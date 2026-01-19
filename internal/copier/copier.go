@@ -104,14 +104,18 @@ func (c *Copier) CopyFile(sourcePath string, overwrite bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to open source file: %w", err)
 	}
-	defer srcFile.Close()
+	defer func() { _ = srcFile.Close() }() // Read-only, close error is not critical
 
 	// Create destination file
 	dstFile, err := os.Create(destPath)
 	if err != nil {
 		return fmt.Errorf("failed to create destination file: %w", err)
 	}
-	defer dstFile.Close()
+	defer func() {
+		if cerr := dstFile.Close(); cerr != nil && err == nil {
+			err = fmt.Errorf("failed to close destination file: %w", cerr)
+		}
+	}()
 
 	// Copy content
 	_, err = io.Copy(dstFile, srcFile)

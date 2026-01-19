@@ -11,7 +11,7 @@ func IsFileLocked(filePath string) bool {
 	if err != nil {
 		return true // File is locked or doesn't exist
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	return false
 }
 
