@@ -1,6 +1,6 @@
 module copy-image
 
-go 1.25.5
+go 1.23
 
 require (
 	github.com/schollz/progressbar/v3 v3.19.0
