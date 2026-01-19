@@ -1,0 +1,272 @@
+package config
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+func TestDefaultConfig(t *testing.T) {
+	cfg := DefaultConfig()
+
+	if cfg.Source != "" {
+		t.Errorf("Expected empty Source, got %s", cfg.Source)
+	}
+	if cfg.Destination != "" {
+		t.Errorf("Expected empty Destination, got %s", cfg.Destination)
+	}
+	if cfg.Workers != 10 {
+		t.Errorf("Expected Workers=10, got %d", cfg.Workers)
+	}
+	if cfg.Overwrite != false {
+		t.Error("Expected Overwrite=false")
+	}
+	if cfg.MaxRetries != 3 {
+		t.Errorf("Expected MaxRetries=3, got %d", cfg.MaxRetries)
+	}
+	if cfg.DryRun != false {
+		t.Error("Expected DryRun=false")
+	}
+	if len(cfg.Extensions) != 0 {
+		t.Errorf("Expected empty Extensions, got %v", cfg.Extensions)
+	}
+}
+
+func TestLoadFromFile(t *testing.T) {
+	// Create temp config file
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "test-config.yaml")
+
+	configContent := `
+source: "/test/source"
+destination: "/test/dest"
+workers: 5
+overwrite: true
+max_retries: 2
+dry_run: true
+extensions:
+  - .jpg
+  - .png
+`
+	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
+		t.Fatalf("Failed to write config file: %v", err)
+	}
+
+	cfg, err := LoadFromFile(configPath)
+	if err != nil {
+		t.Fatalf("LoadFromFile failed: %v", err)
+	}
+
+	if cfg.Source != "/test/source" {
+		t.Errorf("Expected Source='/test/source', got %s", cfg.Source)
+	}
+	if cfg.Destination != "/test/dest" {
+		t.Errorf("Expected Destination='/test/dest', got %s", cfg.Destination)
+	}
+	if cfg.Workers != 5 {
+		t.Errorf("Expected Workers=5, got %d", cfg.Workers)
+	}
+	if cfg.Overwrite != true {
+		t.Error("Expected Overwrite=true")
+	}
+	if cfg.MaxRetries != 2 {
+		t.Errorf("Expected MaxRetries=2, got %d", cfg.MaxRetries)
+	}
+	if cfg.DryRun != true {
+		t.Error("Expected DryRun=true")
+	}
+	if len(cfg.Extensions) != 2 {
+		t.Errorf("Expected 2 extensions, got %d", len(cfg.Extensions))
+	}
+}
+
+func TestLoadFromFileNotFound(t *testing.T) {
+	_, err := LoadFromFile("/non/existent/config.yaml")
+	if err == nil {
+		t.Error("Expected error for non-existent file")
+	}
+}
+
+func TestLoadFromFileInvalidYaml(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "invalid.yaml")
+
+	// Write invalid YAML
+	invalidContent := `
+source: [invalid
+destination: unclosed bracket
+`
+	if err := os.WriteFile(configPath, []byte(invalidContent), 0644); err != nil {
+		t.Fatalf("Failed to write config file: %v", err)
+	}
+
+	_, err := LoadFromFile(configPath)
+	if err == nil {
+		t.Error("Expected error for invalid YAML")
+	}
+}
+
+func TestValidate(t *testing.T) {
+	tests := []struct {
+		name        string
+		config      *Config
+		expectError bool
+	}{
+		{
+			name: "valid config",
+			config: &Config{
+				Source:      "/path/to/source",
+				Destination: "/path/to/dest",
+				Workers:     10,
+			},
+			expectError: false,
+		},
+		{
+			name: "missing source",
+			config: &Config{
+				Source:      "",
+				Destination: "/path/to/dest",
+			},
+			expectError: true,
+		},
+		{
+			name: "missing destination",
+			config: &Config{
+				Source:      "/path/to/source",
+				Destination: "",
+			},
+			expectError: true,
+		},
+		{
+			name: "workers too low - auto fix",
+			config: &Config{
+				Source:      "/path/to/source",
+				Destination: "/path/to/dest",
+				Workers:     0,
+			},
+			expectError: false,
+		},
+		{
+			name: "workers too high - auto fix",
+			config: &Config{
+				Source:      "/path/to/source",
+				Destination: "/path/to/dest",
+				Workers:     100,
+			},
+			expectError: false,
+		},
+		{
+			name: "negative retries - auto fix",
+			config: &Config{
+				Source:      "/path/to/source",
+				Destination: "/path/to/dest",
+				Workers:     10,
+				MaxRetries:  -1,
+			},
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.config.Validate()
+			if tt.expectError && err == nil {
+				t.Error("Expected error but got nil")
+			}
+			if !tt.expectError && err != nil {
+				t.Errorf("Expected no error but got: %v", err)
+			}
+		})
+	}
+}
+
+func TestValidateWorkersAutoFix(t *testing.T) {
+	cfg := &Config{
+		Source:      "/path/to/source",
+		Destination: "/path/to/dest",
+		Workers:     0,
+	}
+	if err := cfg.Validate(); err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if cfg.Workers != 1 {
+		t.Errorf("Expected Workers to be fixed to 1, got %d", cfg.Workers)
+	}
+
+	cfg.Workers = 100
+	if err := cfg.Validate(); err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if cfg.Workers != 50 {
+		t.Errorf("Expected Workers to be fixed to 50, got %d", cfg.Workers)
+	}
+}
+
+func TestValidateMaxRetriesAutoFix(t *testing.T) {
+	cfg := &Config{
+		Source:      "/path/to/source",
+		Destination: "/path/to/dest",
+		Workers:     10,
+		MaxRetries:  -5,
+	}
+	if err := cfg.Validate(); err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if cfg.MaxRetries != 0 {
+		t.Errorf("Expected MaxRetries to be fixed to 0, got %d", cfg.MaxRetries)
+	}
+}
+
+func TestHasExtensionFilter(t *testing.T) {
+	cfg := DefaultConfig()
+
+	if cfg.HasExtensionFilter() {
+		t.Error("Expected HasExtensionFilter=false for empty extensions")
+	}
+
+	cfg.Extensions = []string{".jpg", ".png"}
+	if !cfg.HasExtensionFilter() {
+		t.Error("Expected HasExtensionFilter=true for non-empty extensions")
+	}
+}
+
+func TestIsExtensionAllowed(t *testing.T) {
+	cfg := &Config{
+		Extensions: []string{".jpg", ".png", ".gif"},
+	}
+
+	tests := []struct {
+		ext      string
+		expected bool
+	}{
+		{".jpg", true},
+		{".png", true},
+		{".gif", true},
+		{".pdf", false},
+		{".doc", false},
+		{"", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.ext, func(t *testing.T) {
+			result := cfg.IsExtensionAllowed(tt.ext)
+			if result != tt.expected {
+				t.Errorf("IsExtensionAllowed(%s) = %v, expected %v", tt.ext, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestIsExtensionAllowedNoFilter(t *testing.T) {
+	cfg := &Config{
+		Extensions: []string{},
+	}
+
+	// All extensions should be allowed when no filter is set
+	if !cfg.IsExtensionAllowed(".anything") {
+		t.Error("Expected all extensions to be allowed when no filter")
+	}
+	if !cfg.IsExtensionAllowed(".random") {
+		t.Error("Expected all extensions to be allowed when no filter")
+	}
+}
