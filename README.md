@@ -1,233 +1,153 @@
+<p align="center">
+  <img src="./assets/hero-banner.png" alt="Copy Image Tool Hero Banner" width="800px">
+</p>
+
 # Copy Image Tool 📷
 
-![Go Version](https://img.shields.io/github/go-mod/go-version/hoangtran1411/copy-image)
-![License](https://img.shields.io/github/license/hoangtran1411/copy-image)
-![Build Status](https://img.shields.io/github/actions/workflow/status/hoangtran1411/copy-image/ci.yml?branch=main)
+<p align="center">
+  <img src="https://img.shields.io/github/go-mod/go-version/hoangtran1411/copy-image?style=for-the-badge&logo=go&logoColor=white" alt="Go Version">
+  <img src="https://img.shields.io/github/v/release/hoangtran1411/copy-image?style=for-the-badge&color=orange" alt="Release Version">
+  <img src="https://img.shields.io/github/license/hoangtran1411/copy-image?style=for-the-badge&color=blue" alt="License">
+  <img src="https://img.shields.io/github/actions/workflow/status/hoangtran1411/copy-image/ci.yml?branch=main&style=for-the-badge" alt="Build Status">
+</p>
 
-> Bulk image copy tool with parallel processing support. Available as both CLI and Desktop application.
+<p align="center">
+  <strong>Effortless, high-speed bulk image migration for professionals.</strong><br>
+  Available as a modern <strong>Desktop GUI</strong> and a powerful <strong>CLI</strong>.
+</p>
 
-## ✨ Features
+---
 
-### Core Features
-- 🚀 **Parallel Processing** - Worker pool for concurrent file copying
-- 📊 **Real-time Progress** - Visual progress bar with file counts
-- 🔄 **Retry Mechanism** - Auto-retry with exponential backoff
-- 📝 **Detailed Reports** - Statistics for success/failed/skipped files
-- 🎯 **Extension Filter** - Copy only specified file types
-- 🔧 **Flexible Config** - YAML config file and CLI flags support
-- 🌐 **UNC Path Support** - Works with network share paths
+## 🌟 Why Copy Image Tool?
 
-### Desktop App Features (Wails)
-- 🖥️ **Native Desktop App** - Modern GUI with dark mode theme
-- 📁 **Native Dialogs** - OS folder picker dialogs
-- 🔔 **Toast Notifications** - Real-time status updates
-- 🔄 **Auto-Update** - Check and install updates from GitHub Releases
-- 📊 **Visual Progress** - Animated progress bar with file details
-- ⚙️ **Settings UI** - Configure workers, extensions, and options
+Copy Image Tool is designed for high-performance file orchestration. Whether you are managing product catalogs with thousands of images or distributing assets across multiple network shares, this tool ensures speed, reliability, and precision.
 
-## 📁 Project Structure
+### ✨ Key Highlights
 
-```
-copy-image/
-├── cmd/copyimage/           # CLI entry point
-│   └── main.go
-├── main_wails.go            # Wails desktop entry point (Windows only)
-├── app.go                   # Wails app bindings (Windows only)
-├── updater.go               # Auto-update functionality (Windows only)
-├── frontend/                # Desktop UI (HTML/CSS/JS)
-│   └── dist/
-│       ├── index.html
-│       ├── style.css
-│       └── app.js
-├── internal/
-│   ├── config/config.go     # Configuration with Copy Groups
-│   ├── copier/copier.go     # Core copy logic
-│   └── utils/filelock.go    # File utilities
-├── wails.json               # Wails configuration
-├── config.yaml              # Default configuration
-└── Makefile                 # Build commands
-```
+*   � **Performance First**: Built with Go's legendary concurrency for blazing-fast parallel copying.
+*   � **Premium Desktop Experience**: A state-of-the-art GUI built with Wails, featuring glassmorphism and real-time status updates.
+*   � **Smart Copy Groups**: Unique feature to map one source to multiple destinations with individual settings.
+*   � **Network Native**: First-class support for UNC paths and complex network share environments.
+*   � **Bulletproof Updates**: Integrated auto-update system keeps you on the latest version effortlessly.
 
-## 🚀 Installation
+---
+
+## 🖼️ Screenshots
+
+<p align="center">
+  <img src="./assets/ui-mockup.png" alt="Desktop UI Mockup" width="700px">
+</p>
+
+---
+
+## 🚀 Features at a Glance
+
+### 🖥️ Desktop Application (Wails)
+- **Modern Dark Theme**: Eye-pleasing premium dark mode interface.
+- **Native OS Dialogs**: Integrated folder pickers for a seamless experience.
+- **Interactive Progress**: Real-time animated progress bars with per-file details.
+- **Toast Notifications**: Get notified instantly on successes or errors.
+- **Live Settings**: Adjust workers, extensions, and retry logic on the fly.
+
+### ⌨️ Command Line Interface
+- **Headless Power**: Perfect for automation scripts and server environments.
+- **Interactive Menu**: Quick-access interactive terminal interface.
+- **Dry-Run Mode**: Preview your migration before moving a single byte.
+- **Robust Retries**: Exponential backoff ensures transient network issues don't stop your work.
+
+---
+
+## 🛠️ Built With
+
+<p align="left">
+  <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go">
+  <img src="https://img.shields.io/badge/Wails-FF0000?style=for-the-badge&logo=wails&logoColor=white" alt="Wails">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JS">
+</p>
+
+---
+
+## � Installation & Setup
 
 ### Requirements
-- Go 1.21 or later
-- For Desktop App: Windows 10/11, Wails CLI v2
+- **Go**: v1.21 or higher
+- **Desktop App**: Windows 10/11 (WebView2 required)
+
+### Fast Install
+Download the latest binaries directly from our [Releases Page](https://github.com/hoangtran1411/copy-image/releases).
 
 ### Build from Source
-
 ```bash
-# Clone repo
+# Clone the repository
 git clone https://github.com/hoangtran1411/copy-image.git
 cd copy-image
 
-# Download dependencies
+# install dependencies
 go mod tidy
 
 # Build CLI
-go build -o copyimage.exe ./cmd/copyimage
+make build
 
-# Build Desktop App (Windows only)
+# Build Desktop App (Windows)
 wails build -clean
 ```
 
-## 📖 Usage
+---
 
-### Interactive Mode (Default)
+## 📖 Quick Start
 
+### Running the Desktop App
+Simply run `copyimage-desktop-windows-amd64.exe` to launch the GUI.
+
+### Using the CLI
 ```bash
-# Run with default config file
-./copyimage.exe
+# Interactive mode (Recommended)
+./copyimage-cli.exe
 
-# Or specify a config file
-./copyimage.exe --config my-config.yaml
+# Command line mode (Automation)
+./copyimage-cli.exe --source "C:\Photos" --dest "D:\Backup" --overwrite --workers 12
 ```
 
-The program will display a menu:
-```
-┌─────────────────────────────────────┐
-│         SELECT OPERATION            │
-├─────────────────────────────────────┤
-│  0: Don't copy (exit)               │
-│  1: Copy and overwrite existing     │
-│  2: Copy and skip existing files    │
-└─────────────────────────────────────┘
-```
+---
 
-### Command Line Mode
-
-```bash
-# Copy with options
-./copyimage.exe \
-  --source "\\192.1.1.1\share\images" \
-  --dest "\\192.1.1.20\backup\images" \
-  --overwrite \
-  --workers 15 \
-  --ext ".jpg,.png,.gif" \
-  --interactive=false
-
-# Dry-run mode (preview without copying)
-./copyimage.exe --dry-run --interactive=false
-
-# Show version
-./copyimage.exe --version
-```
-
-### CLI Flags
-
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--source` | Source directory path | (from config) |
-| `--dest` | Destination directory path | (from config) |
-| `--overwrite` | Overwrite existing files | false |
-| `--workers` | Number of parallel workers | 10 |
-| `--config` | Path to config file | config.yaml |
-| `--dry-run` | Preview mode | false |
-| `--ext` | Comma-separated list of extensions | (all files) |
-| `--interactive` | Interactive mode | true |
-| `--version` | Show version | - |
-
-## ⚙️ Configuration
-
-### config.yaml
+## ⚙️ Configuration (`config.yaml`)
 
 ```yaml
-# Source directory - Network path to copy files from
-source: "\\\\192.1.1.1\\DM_DON_GIA_LUONG\\ROUTING 2023 + HÌNH MẪU\\HINHMAUSP\\HÌNH CHƯA TẢI"
-
-# Destination directory - Network path to copy files to
-destination: "\\\\192.1.1.20\\dmdgl$\\HinhAnh"
-
-# Number of concurrent workers
+# Global settings
 workers: 10
-
-# Whether to overwrite existing files
-overwrite: true
-
-# File extensions to include (empty = all files)
-extensions:
-  - .jpg
-  - .jpeg
-  - .png
-  - .gif
-
-# Maximum retry attempts
+extensions: [.jpg, .png, .gif]
 max_retries: 3
-
-# Dry run mode
 dry_run: false
+
+# Copy Groups
+groups:
+  - id: "catalog-sync"
+    name: "Sync Product Catalog"
+    source: "\\\\server-a\\images"
+    enabled: true
+    destinations:
+      - { path: "\\\\server-b\\public", overwrite: true, enabled: true }
+      - { path: "D:\\LocalArchive", overwrite: false, enabled: true }
 ```
 
-## 📊 Sample Output
+---
 
-```
-╔═══════════════════════════════════════════════════════════╗
-║          📷 Bulk Image Copy Tool - v2.0.0                 ║
-╚═══════════════════════════════════════════════════════════╝
+## 🤝 Contribution
 
-🔍 Scanning source directory...
-📁 Found 100 file(s)
+We welcome all contributions! Whether it's fixing bugs, improving documentation, or suggesting new features.
 
-🚀 Starting file copy...
-Copying files... [==================>          ] 75/100 7.5 it/s
+Please read our [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
-========== RESULTS ===========
-Total files:    100
-Successful:     95 ✓
-Failed:         3 ✗
-Skipped:        2 ⊘
-Duration:       5.20s
-===============================
-```
+---
 
-## 🧪 Testing
+## 📜 License
 
-```bash
-# Run tests
-go test ./...
+Distributed under the **MIT License**. See `LICENSE` for more information.
 
-# Run tests with coverage
-go test -cover ./...
+---
 
-# Run tests verbose
-go test -v ./...
-
-# Generate coverage report
-make coverage
-```
-
-## 🔧 Makefile Commands
-
-```bash
-# Build CLI
-make build
-
-# Build Wails Desktop App
-make wails-build
-
-# Run Wails in development mode
-make wails-dev
-
-# Run all tests
-make test
-
-# Run linter
-make lint
-
-# Clean build artifacts
-make clean
-```
-
-## 📝 License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
-## 🤝 Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/hoangtran1411">Hoang Tran</a>
+</p>
