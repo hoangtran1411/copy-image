@@ -19,8 +19,8 @@ import (
 // CurrentVersion holds the application version.
 // This should be updated when releasing new versions.
 // For production builds, use ldflags to inject the version at build time:
-// go build -ldflags "-X main.CurrentVersion=v2.1.1"
-var CurrentVersion = "v2.1.1"
+// go build -ldflags "-X main.CurrentVersion=v2.1.2"
+var CurrentVersion = "v2.1.2"
 
 // GitHubOwner and GitHubRepo identify the repository for update checks.
 // These constants define where to look for new releases on GitHub.
@@ -91,11 +91,23 @@ func (a *App) CheckForUpdate() UpdateInfo {
 	info.ReleaseURL = release.HTMLURL
 
 	// Find the Windows executable in the release assets.
-	// We look for any .exe file as the downloadable update.
+	// We specifically look for the "desktop-windows-amd64" version to avoid
+	// accidentally downloading the CLI version within the Desktop app.
 	for _, asset := range release.Assets {
-		if strings.HasSuffix(strings.ToLower(asset.Name), ".exe") {
+		name := strings.ToLower(asset.Name)
+		if strings.Contains(name, "desktop") && strings.HasSuffix(name, ".exe") {
 			info.DownloadURL = asset.BrowserDownloadURL
 			break
+		}
+	}
+
+	// Fallback for older naming conventions or if 'desktop' is not found
+	if info.DownloadURL == "" {
+		for _, asset := range release.Assets {
+			if strings.HasSuffix(strings.ToLower(asset.Name), ".exe") {
+				info.DownloadURL = asset.BrowserDownloadURL
+				break
+			}
 		}
 	}
 
