@@ -1,12 +1,10 @@
 # golangci-lint configuration for copy-image project
-# This configuration is optimized for a Wails desktop application
+# This configuration is optimized for cross-platform builds
 # ================================================================
 
 run:
   timeout: 5m
-  # Build tags for Windows-specific code
-  build-tags:
-    - windows
+
 
 linters:
   enable:
@@ -61,21 +59,19 @@ issues:
     - frontend
     - build
   
+  # Skip Wails-specific files that require Windows
+  # These files have //go:build windows constraint
+  exclude-files:
+    - "main_wails.go"
+    - "app.go"
+    - "updater.go"
+    - "updater_test.go"
+  
   # Exclude some issues in specific files
   exclude-rules:
     # Exclude some linters from running on test files
     - path: _test\.go
       linters:
         - gosec
-        - errcheck
-    
-    # Wails bindings may have unused parameters (required for interface)
-    - path: app\.go
-      linters:
-        - unused
-    
-    # Updater may have error checks intentionally skipped
-    - path: updater\.go
-      linters:
         - errcheck
 
