@@ -663,7 +663,7 @@ body {
     outline: none;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    
+
     /* Flexbox for icon alignment */
     display: flex;
     align-items: center;
@@ -732,12 +732,14 @@ body {
 /* Toast */
 #toast-container {
     position: fixed;
-    bottom: 20px;
+    top: 30px;
     right: 20px;
     z-index: 1000;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    pointer-events: none;
+    /* Allow clicks to pass through container */
 }
 
 .toast {
@@ -753,6 +755,8 @@ body {
     gap: 10px;
     animation: slideIn 0.3s ease;
     min-width: 300px;
+    pointer-events: auto;
+    /* Re-enable clicks on the toast itself */
 }
 
 .toast.success {

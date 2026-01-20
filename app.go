@@ -149,6 +149,10 @@ func (a *App) StartCopy(overwrite bool) CopyResult {
 	// Update the overwrite setting based on user choice
 	a.config.Overwrite = overwrite
 
+	// Re-initialize copier with the latest config
+	// This ensures we use the current settings (especially if DryRun was toggled)
+	a.copier = copier.New(a.config)
+
 	// Create a cancellable context for this copy operation.
 	// This allows users to stop long-running copies without closing the app.
 	ctx, cancel := context.WithCancel(a.ctx)

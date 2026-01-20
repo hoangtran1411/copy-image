@@ -231,6 +231,9 @@ async function scanFiles() {
  * @param {boolean} overwrite - Whether to overwrite existing files
  */
 async function startCopy(overwrite) {
+    // Ensure we have the latest config from UI (e.g. Dry Run toggle)
+    await updateConfigFromForm();
+
     const destPath = document.getElementById('destPath').value;
     if (!destPath) {
         showToast('Please select a destination folder', 'error');
@@ -250,7 +253,11 @@ async function startCopy(overwrite) {
 
     try {
         const result = await window.go.main.App.StartCopy(overwrite);
-        // Result is handled by the complete event
+        // If isCopying is still true, it means we haven't received a complete event
+        // (possibly because the backend returned early due to an error or empty list)
+        if (isCopying) {
+            handleCompleteEvent(result);
+        }
     } catch (err) {
         showToast('Copy failed: ' + err, 'error');
         hideProgressCard();
