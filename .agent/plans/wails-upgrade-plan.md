@@ -1,12 +1,12 @@
-# 🚀 Implementation Plan: Nâng cấp Copy Image lên Wails Desktop App
+# 🚀 Implementation Plan: Upgrade Copy Image to Wails Desktop App
 
-> **Mục tiêu**: Chuyển đổi ứng dụng CLI hiện tại thành ứng dụng desktop hiện đại với giao diện đồ họa (GUI) sử dụng Wails framework.
+> **Goal**: Convert the current CLI application into a modern desktop application with a graphical user interface (GUI) using the Wails framework.
 
 ---
 
-## 📋 Tổng quan Project Hiện tại
+## 📋 Existing Project Overview
 
-### Cấu trúc hiện có
+### Existing Structure
 ```
 copy-image/
 ├── cmd/copyimage/main.go      # CLI Entry point (231 lines)
@@ -18,71 +18,64 @@ copy-image/
 └── go.mod                     # Go 1.23
 ```
 
-### Các thành phần chính có thể tái sử dụng
-| Component | Mô tả | Tái sử dụng |
-|-----------|-------|-------------|
-| `config.Config` | Struct cấu hình với YAML parsing | ✅ 100% |
-| `copier.Copier` | Logic copy file với worker pool | ✅ 90% (cần thêm events) |
-| `copier.CopySummary` | Kết quả thống kê copy | ✅ 100% |
+### Reusable Key Components
+| Component | Description | Reusable |
+|-----------|-------------|----------|
+| `config.Config` | Configuration structure with YAML parsing | ✅ 100% |
+| `copier.Copier` | File copy logic with worker pool | ✅ 90% (needs events) |
+| `copier.CopySummary` | Copy statistics results | ✅ 100% |
 | `utils/*` | File utilities | ✅ 100% |
 
 ---
 
-## 🎯 Tính năng mới với Wails
+## 🎯 New Features with Wails
 
-### So sánh CLI vs Desktop App
+### CLI vs Desktop App Comparison
 
-| Tính năng | CLI hiện tại | Wails Desktop |
-|-----------|-------|---------------|
-| Chọn thư mục | Nhập path thủ công | 📁 Native folder picker dialog |
+| Feature | Current CLI | Wails Desktop |
+|---------|-------------|---------------|
+| Folder Selection | Manual path entry | 📁 Native folder picker dialog |
 | Progress | Text progress bar | 🎨 Real-time animated progress bar |
-| Cấu hình | File YAML | ⚙️ Settings UI với form inputs |
-| Thao tác | Terminal commands | 🖱️ Buttons, dropdowns, checkboxes |
-| Kết quả | Print to console | 📊 Visual summary với charts |
-| Notifications | Không có | 🔔 Desktop notifications |
-| Dark mode | Không có | 🌙 Native dark/light mode |
-| Drag & Drop | Không có | 📥 Kéo thả thư mục vào app |
+| Configuration | YAML file | ⚙️ Settings UI with form inputs |
+| Interaction | Terminal commands | 🖱️ Buttons, dropdowns, checkboxes |
+| Results | Print to console | 📊 Visual summary with results |
+| Notifications | None | 🔔 Desktop notifications |
+| Dark mode | None | 🌙 Native dark/light mode |
+| Drag & Drop | None | 📥 Drag and drop folders into the app |
 
 ---
 
-## 📐 Kiến trúc mới
+## 📐 New Architecture
 
 ```
 copy-image/
 ├── app.go                     # Wails app struct & bindings (NEW)
-├── main.go                    # Wails entry point (REPLACE)
-├── frontend/                  # React/Svelte UI (NEW)
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── components/
-│   │   │   ├── FolderSelector.jsx
-│   │   │   ├── ProgressBar.jsx
-│   │   │   ├── SettingsPanel.jsx
-│   │   │   └── SummaryCard.jsx
-│   │   └── wailsjs/          # Auto-generated bindings
-│   ├── index.html
-│   └── package.json
+├── main_wails.go              # Wails entry point (NEW)
+├── frontend/                  # Web-based UI (NEW)
+│   └── dist/                  # Built frontend assets
+│       ├── index.html
+│       ├── style.css
+│       └── app.js
 ├── internal/
-│   ├── config/config.go       # (giữ nguyên)
+│   ├── config/config.go       # (kept)
 │   ├── copier/
-│   │   ├── copier.go          # (cập nhật thêm events)
-│   │   └── events.go          # Event emitter cho progress (NEW)
-│   └── utils/filelock.go      # (giữ nguyên)
-├── wails.json                 # Wails config (NEW)
-└── go.mod                     # Cập nhật deps
+│   │   ├── copier.go          # (updated with events)
+│   └── utils/filelock.go      # (kept)
+├── wails.json                 # Wails configuration (NEW)
+└── go.mod                     # Updated dependencies
 ```
 
 ---
 
-## 🎯 Tính năng đặc biệt: Copy Groups
+## 🎯 Special Feature: Copy Groups
 
-### Mô tả
-Cho phép tạo các **Copy Group** - mỗi group có 1 source và nhiều destinations. Giúp người dùng copy hình ảnh từ 1 thư mục nguồn đến nhiều thư mục đích cùng lúc.
+### Description
+Allows creating **Copy Groups** - each group has 1 source and multiple destinations. Helps users copy images from one source folder to multiple destination folders simultaneously.
 
 ### Use Cases
-- Copy hình ảnh sản phẩm từ folder chung đến nhiều server khác nhau
-- Backup đồng thời đến nhiều ổ đĩa/network shares
-- Phân phối assets đến nhiều môi trường (dev, staging, production)
+- Copying product images from a common folder to multiple different servers
+- Simultaneous backup to multiple drives/network shares
+- Distributing assets to multiple environments (dev, staging, production)
 
 ### Data Structure
 
@@ -126,7 +119,7 @@ type Config struct {
 ### Config YAML Example
 
 ```yaml
-# config.yaml - Cấu hình mới với Groups
+# config.yaml - New configuration with Groups
 
 # Global settings
 workers: 10
@@ -138,11 +131,11 @@ extensions:
 max_retries: 3
 dry_run: false
 
-# Copy Groups - 1 source → nhiều destinations
+# Copy Groups - 1 source → multiple destinations
 groups:
   - id: "group-1"
-    name: "📷 Hình mẫu sản phẩm"
-    source: "\\\\192.1.1.1\\DM_DON_GIA_LUONG\\HINHMAUSP\\HÌNH CHƯA TẢI"
+    name: "📷 Product Images"
+    source: "\\\\192.1.1.1\\DM_DON_GIA_LUONG\\HINHMAUSP\\PENDING_UPLOAD"
     enabled: true
     destinations:
       - id: "dest-1"
@@ -156,20 +149,20 @@ groups:
       - id: "dest-3"
         path: "D:\\LocalBackup\\HinhAnh"
         overwrite: true
-        enabled: false  # Tạm tắt
+        enabled: false  # Temporarily disabled
 
   - id: "group-2"
-    name: "📁 Tài liệu kỹ thuật"
-    source: "\\\\192.1.1.1\\TaiLieu\\KyThuat"
+    name: "📁 Technical Docs"
+    source: "\\\\192.1.1.1\\Docs\\Technical"
     enabled: true
     destinations:
       - id: "dest-4"
-        path: "\\\\192.1.1.20\\dmdgl$\\TaiLieu"
+        path: "\\\\192.1.1.20\\dmdgl$\\Docs"
         overwrite: true
         enabled: true
 ```
 
-### UI Design cho Copy Groups
+### UI Design for Copy Groups
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -180,17 +173,17 @@ groups:
 │                                                                 │
 │  ┌── Copy Groups ─────────────────────────────────────────────┐ │
 │  │                                                             │ │
-│  │  ☑ 📷 Hình mẫu sản phẩm                         [Edit][🗑️] │ │
-│  │    └─ Source: \\192.1.1.1\...\HÌNH CHƯA TẢI                │ │
+│  │  ☑ 📷 Product Images                            [Edit][🗑️] │ │
+│  │    └─ Source: \\192.1.1.1\...\PENDING_UPLOAD               │ │
 │  │    └─ Destinations:                                         │ │
 │  │       ☑ \\192.1.1.20\dmdgl$\HinhAnh (overwrite: ✓)        │ │
 │  │       ☑ \\192.1.1.30\backup\HinhAnh (overwrite: ✗)        │ │
 │  │       ☐ D:\LocalBackup\HinhAnh (disabled)                  │ │
 │  │                                                             │ │
-│  │  ☑ 📁 Tài liệu kỹ thuật                         [Edit][🗑️] │ │
-│  │    └─ Source: \\192.1.1.1\TaiLieu\KyThuat                  │ │
+│  │  ☑ 📁 Technical Docs                            [Edit][🗑️] │ │
+│  │    └─ Source: \\192.1.1.1\Docs\Technical                   │ │
 │  │    └─ Destinations:                                         │ │
-│  │       ☑ \\192.1.1.20\dmdgl$\TaiLieu (overwrite: ✓)        │ │
+│  │       ☑ \\192.1.1.20\dmdgl$\Docs (overwrite: ✓)            │ │
 │  │                                                             │ │
 │  │                                    [+ Add New Group]        │ │
 │  └─────────────────────────────────────────────────────────────┘ │
@@ -202,8 +195,8 @@ groups:
 │  └─────────────────────────────────────────────────────────────┘ │
 │                                                                 │
 │  ┌── Progress ────────────────────────────────────────────────┐ │
-│  │  Group: Hình mẫu sản phẩm                                  │ │
-│  │  Dest: \\192.1.1.20\dmdgl$\HinhAnh                        │ │
+│  │  Group: Product Images                                     │ │
+│  │  Dest: \\192.1.1.20\dmdgl$\HinhAnh                         │ │
 │  │  [████████████░░░░░░░░] 65% (130/200 files)                │ │
 │  │  Current: product_12345.jpg                                 │ │
 │  └─────────────────────────────────────────────────────────────┘ │
@@ -211,7 +204,7 @@ groups:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Backend API cho Groups
+### Backend API for Groups
 
 ```go
 // app.go - Wails bindings
@@ -236,7 +229,7 @@ func (a *App) StartAllGroupsCopy() error
 func (a *App) CancelCopy() error
 ```
 
-### Copy Logic với Groups
+### Copy Logic with Groups
 
 ```go
 // internal/copier/group_copier.go
@@ -288,9 +281,9 @@ func (c *Copier) CopyGroup(ctx context.Context, group config.CopyGroup, files []
 ### Progress Events Structure
 
 ```go
-// Events gửi đến frontend
+// Events sent to the frontend
 
-// Khi bắt đầu copy một group
+// When starting group copy
 type GroupStartEvent struct {
     GroupID   string   `json:"groupId"`
     GroupName string   `json:"groupName"`
@@ -298,7 +291,7 @@ type GroupStartEvent struct {
     FileCount int      `json:"fileCount"`
 }
 
-// Khi bắt đầu copy đến một destination
+// When starting copy to a destination
 type DestStartEvent struct {
     GroupID   string `json:"groupId"`
     DestID    string `json:"destId"`
@@ -306,7 +299,7 @@ type DestStartEvent struct {
     FileCount int    `json:"fileCount"`
 }
 
-// Progress cho mỗi file
+// File progress update
 type FileProgressEvent struct {
     GroupID   string  `json:"groupId"`
     DestID    string  `json:"destId"`
@@ -317,7 +310,7 @@ type FileProgressEvent struct {
     Status    string  `json:"status"` // "copying", "success", "failed", "skipped"
 }
 
-// Khi hoàn thành một destination
+// When a destination is complete
 type DestCompleteEvent struct {
     GroupID    string `json:"groupId"`
     DestID     string `json:"destId"`
@@ -326,7 +319,7 @@ type DestCompleteEvent struct {
     Skipped    int    `json:"skipped"`
 }
 
-// Khi hoàn thành toàn bộ group
+// When the entire group copy is complete
 type GroupCompleteEvent struct {
     GroupID   string        `json:"groupId"`
     GroupName string        `json:"groupName"`
@@ -337,10 +330,10 @@ type GroupCompleteEvent struct {
 
 ---
 
-## � Tính năng Auto-Update (Tham khảo từ GoExcelImageImporter)
+## 🔄 Auto-Update Feature (Referenced from GoExcelImageImporter)
 
-### Mô tả
-Tự động kiểm tra và cập nhật phiên bản mới từ GitHub Releases. Đây là tính năng rất hay từ project [GoExcelImageImporter](https://github.com/hoangtran1411/GoExcelImageImporter).
+### Description
+Automatically checks and updates to the latest version from GitHub Releases. This is a great feature from the [GoExcelImageImporter](https://github.com/hoangtran1411/GoExcelImageImporter) project.
 
 ### Implementation: `updater.go`
 
@@ -500,7 +493,7 @@ func (a *App) PerformUpdate(downloadURL string) (bool, error) {
 
     runtime.EventsEmit(a.ctx, "updateProgress", "Installing update...")
 
-    // Create update batch script
+    // Create update batch script for Windows
     batchPath := filepath.Join(tempDir, "update_copyimage.bat")
     batchContent := fmt.Sprintf(`@echo off
 timeout /t 2 /nobreak >nul
@@ -510,7 +503,7 @@ start "" "%s"
 del "%%~f0"
 `, exePath, tempFile, exePath, exePath)
 
-    if err := os.WriteFile(batchPath, []byte(batchContent), 0644); err != nil {
+    if err := os.WriteFile(batchPath, []byte(batchContent), 0600); err != nil {
         return false, fmt.Errorf("failed to create update script: %w", err)
     }
 
@@ -524,81 +517,9 @@ del "%%~f0"
 }
 ```
 
-### Frontend: Update Button & Check
-
-```javascript
-// Global variable to store update info
-let updateInfo = null;
-
-// Check for updates on startup
-async function checkForUpdates() {
-    try {
-        updateInfo = await window.go.main.App.CheckForUpdate();
-        
-        if (updateInfo && updateInfo.available) {
-            const updateBtn = document.getElementById('updateBtn');
-            updateBtn.classList.add('visible');
-            updateBtn.title = `Update to ${updateInfo.latestVersion} available!`;
-        }
-    } catch (err) {
-        console.error('Failed to check for updates:', err);
-    }
-}
-
-// Perform the update
-async function performUpdate() {
-    if (!updateInfo || !updateInfo.downloadUrl) {
-        showToast('No update information available', 'error');
-        return;
-    }
-    
-    showToast(`Downloading ${updateInfo.latestVersion}...`, 'info');
-    
-    try {
-        await window.go.main.App.PerformUpdate(updateInfo.downloadUrl);
-        showToast('Update installed! Restarting...', 'success');
-    } catch (err) {
-        showToast('Update failed: ' + err, 'error');
-    }
-}
-
-// Listen for update progress events
-runtime.EventsOn('updateProgress', function(message) {
-    showToast(message, 'info');
-});
-```
-
-### CSS: Update Button Animation
-
-```css
-.update-btn {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    background: linear-gradient(135deg, var(--accent-success), #059669);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: var(--transition);
-    animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.update-btn.visible {
-    display: flex;
-}
-
-@keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
-    50% { box-shadow: 0 0 16px rgba(16, 185, 129, 0.7); }
-}
-```
-
 ---
 
-## 🎨 Design System (Tham khảo từ GoExcelImageImporter)
+## 🎨 Design System (Referenced from GoExcelImageImporter)
 
 ### CSS Variables - Dark Mode Premium Theme
 
@@ -635,7 +556,7 @@ runtime.EventsOn('updateProgress', function(message) {
 }
 ```
 
-### Card Component với Hover Effect
+### Card Component with Hover Effect
 
 ```css
 .card {
@@ -674,293 +595,72 @@ function showToast(message, type) {
 
 ---
 
-## �📅 Phases triển khai
+## 📅 Implementation Phases
 
-### Phase 1: Setup Wails Project (Day 1)
-**Ước tính: 2-3 giờ**
+### Phase 1: Setup Wails Project
+**Estimated: 2-3 hours**
 
-- [ ] **1.1** Cài đặt Wails CLI
-  ```bash
-  go install github.com/wailsapp/wails/v2/cmd/wails@latest
-  wails doctor  # Kiểm tra dependencies
-  ```
-
-- [ ] **1.2** Khởi tạo project Wails
-  ```bash
-  # Backup code hiện tại
-  git checkout -b feature/wails-upgrade
-
-  # Khởi tạo với template React (hoặc Svelte)
-  wails init -n copy-image-gui -t react-ts
-  ```
-
-- [ ] **1.3** Migrate existing `internal/` packages
-  - Copy toàn bộ `internal/` folder
-  - Cập nhật `go.mod` để include Wails dependency
-
-- [ ] **1.4** Tạo file `app.go` với basic bindings
-  ```go
-  type App struct {
-      ctx    context.Context
-      config *config.Config
-      copier *copier.Copier
-  }
-
-  func (a *App) GetConfig() *config.Config
-  func (a *App) SaveConfig(cfg *config.Config) error
-  func (a *App) SelectFolder(dialogType string) (string, error)
-  func (a *App) StartCopy() error
-  ```
+- [x] **1.1** Install Wails CLI
+- [x] **1.2** Initialize Wails Project
+- [x] **1.3** Migrate existing `internal/` packages
+- [x] **1.4** Create `app.go` with basic bindings
 
 ---
 
-### Phase 2: Backend Bindings (Day 2)
-**Ước tính: 3-4 giờ**
+### Phase 2: Backend Bindings
+**Estimated: 3-4 hours**
 
-- [ ] **2.1** Tạo `app.go` - Main application struct
-  ```go
-  package main
-
-  import (
-      "context"
-      "copy-image/internal/config"
-      "copy-image/internal/copier"
-      "github.com/wailsapp/wails/v2/pkg/runtime"
-  )
-
-  type App struct {
-      ctx    context.Context
-      config *config.Config
-  }
-
-  func NewApp() *App {
-      return &App{}
-  }
-
-  func (a *App) startup(ctx context.Context) {
-      a.ctx = ctx
-      a.config = config.DefaultConfig()
-  }
-  ```
-
-- [ ] **2.2** Implement folder selection dialog
-  ```go
-  func (a *App) SelectSourceFolder() (string, error) {
-      return runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
-          Title: "Chọn thư mục nguồn",
-      })
-  }
-
-  func (a *App) SelectDestFolder() (string, error) {
-      return runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
-          Title: "Chọn thư mục đích",
-      })
-  }
-  ```
-
-- [ ] **2.3** Implement config management
-  ```go
-  func (a *App) GetConfig() *config.Config
-  func (a *App) UpdateConfig(cfg *config.Config) error
-  func (a *App) LoadConfigFromFile(path string) (*config.Config, error)
-  func (a *App) SaveConfigToFile(path string) error
-  ```
-
-- [ ] **2.4** Update `copier.go` để emit events
-  ```go
-  // Thêm event emitter để gửi progress đến frontend
-  type ProgressEvent struct {
-      Current   int     `json:"current"`
-      Total     int     `json:"total"`
-      Percent   float64 `json:"percent"`
-      FileName  string  `json:"fileName"`
-      Status    string  `json:"status"` // "copying", "success", "failed", "skipped"
-  }
-
-  func (c *Copier) CopyFilesParallelWithEvents(ctx context.Context, files []string) CopySummary {
-      // Emit events thay vì print to console
-      runtime.EventsEmit(ctx, "copy:progress", ProgressEvent{...})
-  }
-  ```
-
-- [ ] **2.5** Implement copy operations với events
-  ```go
-  func (a *App) ScanFiles() ([]string, error)
-  func (a *App) StartCopy(overwrite bool) error
-  func (a *App) CancelCopy() error
-  ```
+- [x] **2.1** Create `app.go` - Main application struct
+- [x] **2.2** Implement folder selection dialog
+- [x] **2.3** Implement config management
+- [x] **2.4** Update `copier.go` to emit events (CopyFilesParallelWithEvents)
+- [x] **2.5** Implement copy operations with events
 
 ---
 
-### Phase 3: Frontend UI (Day 3-4)
-**Ước tính: 6-8 giờ**
+### Phase 3: Frontend UI
+**Estimated: 6-8 hours**
 
-- [ ] **3.1** Setup modern styling
-  - Sử dụng CSS Variables cho theming
-  - Dark mode support
-  - Glassmorphism effects
-
-- [ ] **3.2** Tạo `FolderSelector` component
-  ```jsx
-  // Hiển thị source/dest paths với nút Browse
-  <FolderSelector
-    label="Thư mục nguồn"
-    value={config.source}
-    onChange={handleSourceChange}
-    onBrowse={handleBrowseSource}
-  />
-  ```
-
-- [ ] **3.3** Tạo `SettingsPanel` component
-  ```jsx
-  // Workers slider, extensions checkboxes, overwrite toggle
-  <SettingsPanel
-    workers={config.workers}
-    extensions={config.extensions}
-    overwrite={config.overwrite}
-    dryRun={config.dryRun}
-    onChange={handleConfigChange}
-  />
-  ```
-
-- [ ] **3.4** Tạo `ProgressBar` component với animations
-  ```jsx
-  // Animated progress bar với file count
-  <ProgressBar
-    current={progress.current}
-    total={progress.total}
-    currentFile={progress.fileName}
-    status={progress.status}
-  />
-  ```
-
-- [ ] **3.5** Tạo `SummaryCard` component
-  ```jsx
-  // Hiển thị kết quả với icons
-  <SummaryCard
-    total={summary.totalFiles}
-    success={summary.successful}
-    failed={summary.failed}
-    skipped={summary.skipped}
-    duration={summary.duration}
-  />
-  ```
-
-- [ ] **3.6** Tạo main `App.jsx` layout
-  - Header với logo và version
-  - Body với tabs: Copy | Settings | About
-  - Footer với action buttons
+- [x] **3.1** Setup modern styling with dark mode support
+- [x] **3.2** Create folder selection UI components
+- [x] **3.3** Create settings UI components
+- [x] **3.4** Create progress bar component with animations
+- [x] **3.5** Create summary results view
+- [x] **3.6** Assemble Main App layout
 
 ---
 
-### Phase 4: Event Integration (Day 5)
-**Ước tính: 2-3 giờ**
+### Phase 4: Event Integration
+**Estimated: 2-3 hours**
 
-- [ ] **4.1** Subscribe to backend events trong frontend
-  ```jsx
-  useEffect(() => {
-    EventsOn("copy:progress", (data) => {
-      setProgress(data);
-    });
-
-    EventsOn("copy:complete", (summary) => {
-      setSummary(summary);
-      setIsCopying(false);
-    });
-
-    return () => {
-      EventsOff("copy:progress");
-      EventsOff("copy:complete");
-    };
-  }, []);
-  ```
-
-- [ ] **4.2** Implement cancel functionality
-  ```go
-  // Backend: sử dụng context cancellation
-  type App struct {
-      cancelFunc context.CancelFunc
-  }
-
-  func (a *App) CancelCopy() {
-      if a.cancelFunc != nil {
-          a.cancelFunc()
-      }
-  }
-  ```
-
-- [ ] **4.3** Error handling và notifications
-  ```jsx
-  // Toast notifications cho errors
-  runtime.EventsOn("copy:error", (error) => {
-    showToast({ type: "error", message: error });
-  });
-  ```
+- [x] **4.1** Subscribe to backend events in frontend (progress, completion)
+- [x] **4.2** Implement cancel functionality using context cancellation
+- [x] **4.3** Error handling and toast notifications
 
 ---
 
-### Phase 5: Polish & Testing (Day 6)
-**Ước tính: 3-4 giờ**
+### Phase 5: Polish & Testing
+**Estimated: 3-4 hours**
 
-- [ ] **5.1** Window configuration
-  ```go
-  wails.Run(&options.App{
-      Title:            "Copy Image Tool",
-      Width:            900,
-      Height:           650,
-      MinWidth:         600,
-      MinHeight:        500,
-      WindowStartState: options.Normal,
-      AssetServer: &assetserver.Options{
-          Assets: assets,
-      },
-      OnStartup: app.startup,
-  })
-  ```
-
-- [ ] **5.2** App icon và branding
-  - Tạo `appicon.png` (1024x1024)
-  - Build icons cho các platforms
-
-- [ ] **5.3** Testing
-  - Test trên Windows 10/11
-  - Test với UNC paths (network shares)
-  - Test drag & drop folders
-  - Test với large file sets (1000+ files)
-
-- [ ] **5.4** Build và packaging
-  ```bash
-  wails build -platform windows/amd64
-  ```
+- [x] **5.1** Window configuration (title, size, background color)
+- [x] **5.2** App icon and branding setup
+- [x] **5.3** Comprehensive testing (UNC paths, large file sets)
+- [x] **5.4** Build and packaging for Windows
 
 ---
 
 ### Phase 6: Advanced Features (Optional - Future)
-**Ước tính: 4-6 giờ**
+**Estimated: 4-6 hours**
 
 - [ ] **6.1** Drag & Drop support
-  ```go
-  // Wails v2.9+ hỗ trợ drag & drop
-  OnDragDrop: func(filenames []string) { ... }
-  ```
-
 - [ ] **6.2** System tray integration
-  - Minimize to tray
-  - Background copy notifications
-
-- [ ] **6.3** File preview thumbnails
-  - Hiển thị thumbnail của images đang copy
-
-- [ ] **6.4** Copy history
-  - Lưu lịch sử các lần copy
-  - Quick repeat last copy
-
-- [ ] **6.5** Multiple copy queues
-  - Hỗ trợ queue nhiều tasks
+- [ ] **6.3** File preview thumbnails during copy
+- [ ] **6.4** Copy history logging
+- [ ] **6.5** Multiple copy queues support
 
 ---
 
-## 📦 Dependencies mới
+## 📦 New Dependencies
 
 ```go
 // go.mod additions
@@ -969,49 +669,37 @@ require (
 )
 ```
 
-```json
-// frontend/package.json
-{
-  "dependencies": {
-    "@wailsio/runtime": "^2.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "lucide-react": "^0.300.0"  // Icons
-  }
-}
-```
-
 ---
 
 ## ✅ Definition of Done
 
 ### MVP Requirements
-- [x] Có thể chọn source/dest folders qua dialog
-- [x] Hiển thị progress bar real-time
-- [x] Hiển thị kết quả sau khi copy xong
-- [x] Settings có thể edit trong UI
-- [x] Build được file .exe standalone
+- [x] Native source/dest folder selection dialogs
+- [x] Real-time animated progress bar
+- [x] Visual summary results after copy
+- [x] Settings editable directly in UI
+- [x] Standalone .exe build successful
+- [x] Auto-update feature functional
+- [x] Copy Groups support implemented in backend
 
 ### Nice to Have
-- [ ] Dark mode support
-- [ ] Drag & drop folders
-- [ ] Desktop notifications
-- [ ] System tray
+- [x] Premium Dark Mode support
+- [ ] Drag & drop folder support
+- [x] Toast notifications
+- [ ] System tray integration
 
 ---
 
-## 🔗 Tài liệu tham khảo
+## 🔗 References
 
 - [Wails Documentation](https://wails.io/docs/introduction)
 - [Wails Examples](https://github.com/wailsapp/wails/tree/master/examples)
-- [React + Wails Template](https://github.com/wailsapp/wails/tree/master/v2/internal/frontend/templates/react-ts)
+- [GoExcelImageImporter](https://github.com/hoangtran1411/GoExcelImageImporter) - Design & Update inspiration
 
 ---
 
 ## 📝 Notes
 
-1. **Giữ nguyên CLI mode**: Có thể giữ lại `cmd/copyimage/main.go` để hỗ trợ headless/automated scenarios.
-
-2. **Config compatibility**: Đảm bảo `config.yaml` format không thay đổi để người dùng hiện tại có thể migrate dễ dàng.
-
-3. **WebView2 requirement**: Wails trên Windows yêu cầu WebView2. Cần document hoặc bundle WebView2 installer.
+1. **Keep CLI mode**: Retain `cmd/copyimage/main.go` for automated/headless scenarios.
+2. **Config compatibility**: Ensure YAML format remains backward compatible.
+3. **WebView2 requirement**: Document that WebView2 is required on Windows for Wails.
