@@ -176,7 +176,7 @@ func (c *Copier) CopyFileWithRetry(sourcePath string) CopyResult {
 			}
 		}
 		lastErr = err
-		
+
 		// Exponential backoff
 		if attempt < c.config.MaxRetries {
 			time.Sleep(time.Duration(attempt+1) * 100 * time.Millisecond)
