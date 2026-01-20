@@ -42,6 +42,26 @@ build-all:
 	set GOOS=darwin&& set GOARCH=amd64&& $(GOBUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-darwin-amd64 $(BINARY_PATH)
 	@echo "Build complete for all platforms"
 
+# ===== Wails Desktop App Targets =====
+
+# Run Wails development server with hot reload
+wails-dev:
+	@echo "Starting Wails development server..."
+	wails dev
+
+# Build Wails production binary
+wails-build:
+	@echo "Building Wails desktop app..."
+	wails build -clean -ldflags "-s -w"
+	@echo "Wails build complete: build/bin/copyimage.exe"
+
+# Build Wails with NSIS installer (requires NSIS installed)
+wails-installer:
+	@echo "Building Wails desktop app with installer..."
+	wails build -nsis -clean -ldflags "-s -w"
+	@echo "Installer created in build/bin/"
+
+
 # Clean build artifacts
 clean:
 	@echo "Cleaning..."

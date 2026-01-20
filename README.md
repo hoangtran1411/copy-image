@@ -4,40 +4,51 @@
 ![License](https://img.shields.io/github/license/hoangtran1411/copy-image)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/hoangtran1411/copy-image/go.yml?branch=main)
 
+> Bulk image copy tool with parallel processing support. Available as both CLI and Desktop application.
 
-> Công cụ sao chép hình ảnh hàng loạt từ thư mục nguồn sang thư mục đích, hỗ trợ xử lý song song để tăng tốc độ.
+## ✨ Features
 
-## ✨ Tính năng
+### Core Features
+- 🚀 **Parallel Processing** - Worker pool for concurrent file copying
+- 📊 **Real-time Progress** - Visual progress bar with file counts
+- 🔄 **Retry Mechanism** - Auto-retry with exponential backoff
+- 📝 **Detailed Reports** - Statistics for success/failed/skipped files
+- 🎯 **Extension Filter** - Copy only specified file types
+- 🔧 **Flexible Config** - YAML config file and CLI flags support
+- 🌐 **UNC Path Support** - Works with network share paths
 
-- 🚀 **Xử lý song song** - Sử dụng worker pool để copy nhiều file đồng thời
-- 📊 **Progress bar** - Hiển thị tiến trình copy trực quan
-- 🔄 **Retry mechanism** - Tự động thử lại khi copy thất bại
-- 📝 **Báo cáo chi tiết** - Thống kê số file thành công/thất bại/bỏ qua
-- 🎯 **Lọc file** - Chỉ copy các file theo extension được chỉ định
-- 🔧 **Cấu hình linh hoạt** - Hỗ trợ config file YAML và CLI flags
-- 🌐 **Hỗ trợ UNC path** - Hoạt động với đường dẫn network share
+### Desktop App Features (Wails)
+- 🖥️ **Native Desktop App** - Modern GUI with dark mode theme
+- 📁 **Native Dialogs** - OS folder picker dialogs
+- 🔔 **Toast Notifications** - Real-time status updates
+- 🔄 **Auto-Update** - Check and install updates from GitHub Releases
+- 📊 **Visual Progress** - Animated progress bar with file details
+- ⚙️ **Settings UI** - Configure workers, extensions, and options
 
-## 📁 Cấu trúc project
+## 📁 Project Structure
 
 ```
 copy-image/
-├── cmd/
-│   └── copyimage/
-│       └── main.go           # Entry point
+├── cmd/copyimage/           # CLI entry point
+│   └── main.go
+├── main_wails.go            # Wails desktop entry point
+├── app.go                   # Wails app bindings
+├── updater.go               # Auto-update functionality
+├── frontend/                # Desktop UI (HTML/CSS/JS)
+│   └── dist/
+│       ├── index.html
+│       ├── style.css
+│       └── app.js
 ├── internal/
-│   ├── config/
-│   │   └── config.go         # Load & validate config
-│   ├── copier/
-│   │   ├── copier.go         # Core copy logic
-│   │   └── copier_test.go    # Unit tests
-│   └── utils/
-│       └── filelock.go       # File utility functions
-├── config.yaml               # Default configuration
-├── go.mod
-├── go.sum
-├── method.md                 # Original documentation
-└── README.md
+│   ├── config/config.go     # Configuration with Copy Groups
+│   ├── copier/copier.go     # Core copy logic
+│   └── utils/filelock.go    # File utilities
+├── wails.json               # Wails configuration
+├── config.yaml              # Default configuration
+└── Makefile                 # Build commands
 ```
+
+
 
 ## 🚀 Cài đặt
 

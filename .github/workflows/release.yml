@@ -1,6 +1,6 @@
 # GitHub Actions workflow for Release
-# Based on: Go Test & Makefile Skill
-# ===================================
+# Builds both CLI and Wails Desktop App
+# ======================================
 
 name: Release
 
@@ -25,10 +25,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -37,21 +37,21 @@ jobs:
         run: go test -v ./...
 
   # ================================
-  # Build and Release
+  # Build CLI binaries
   # ================================
-  release:
-    name: Release
+  build-cli:
+    name: Build CLI
     runs-on: ubuntu-latest
     needs: test
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -59,36 +59,137 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
-      - name: Build binaries
+      - name: Build CLI binaries
         run: |
+          mkdir -p dist
+          
           # Windows amd64
-          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o dist/copyimage-windows-amd64.exe ./cmd/copyimage
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o dist/copyimage-cli-windows-amd64.exe ./cmd/copyimage
           
           # Linux amd64
-          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o dist/copyimage-linux-amd64 ./cmd/copyimage
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o dist/copyimage-cli-linux-amd64 ./cmd/copyimage
           
           # macOS amd64
-          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o dist/copyimage-darwin-amd64 ./cmd/copyimage
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o dist/copyimage-cli-darwin-amd64 ./cmd/copyimage
           
           # macOS arm64 (Apple Silicon)
-          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o dist/copyimage-darwin-arm64 ./cmd/copyimage
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o dist/copyimage-cli-darwin-arm64 ./cmd/copyimage
+
+      - name: Upload CLI artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-binaries
+          path: dist/
+
+  # ================================
+  # Build Wails Desktop App - Windows
+  # ================================
+  build-wails-windows:
+    name: Build Desktop (Windows)
+    runs-on: windows-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Download dependencies
+        run: go mod download
+
+      # Inject version at build time for auto-update feature
+      - name: Build Wails Desktop App
+        run: |
+          wails build -clean -ldflags "-s -w -X main.CurrentVersion=${{ github.ref_name }}"
+
+      - name: Rename output
+        run: |
+          mkdir dist
+          copy build\bin\copyimage.exe dist\copyimage-desktop-windows-amd64.exe
+
+      - name: Upload Desktop artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows
+          path: dist/copyimage-desktop-windows-amd64.exe
+
+  # ================================
+  # Create GitHub Release
+  # ================================
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [build-cli, build-wails-windows]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download CLI artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: cli-binaries
+          path: dist/
+
+      - name: Download Desktop Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: desktop-windows
+          path: dist/
+
+      - name: List artifacts
+        run: ls -la dist/
 
       - name: Create checksums
         run: |
           cd dist
           sha256sum * > checksums.txt
+          cat checksums.txt
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/copyimage-windows-amd64.exe
-            dist/copyimage-linux-amd64
-            dist/copyimage-darwin-amd64
-            dist/copyimage-darwin-arm64
+            dist/copyimage-cli-windows-amd64.exe
+            dist/copyimage-cli-linux-amd64
+            dist/copyimage-cli-darwin-amd64
+            dist/copyimage-cli-darwin-arm64
+            dist/copyimage-desktop-windows-amd64.exe
             dist/checksums.txt
           generate_release_notes: true
           draft: false
           prerelease: false
+          body: |
+            ## 📦 Downloads
+
+            ### Desktop App (Recommended)
+            | Platform | Architecture | Download |
+            |----------|--------------|----------|
+            | Windows | x64 | `copyimage-desktop-windows-amd64.exe` |
+
+            ### CLI Tool
+            | Platform | Architecture | Download |
+            |----------|--------------|----------|
+            | Windows | x64 | `copyimage-cli-windows-amd64.exe` |
+            | Linux | x64 | `copyimage-cli-linux-amd64` |
+            | macOS | x64 (Intel) | `copyimage-cli-darwin-amd64` |
+            | macOS | arm64 (Apple Silicon) | `copyimage-cli-darwin-arm64` |
+
+            ### ✨ What's New
+            See the auto-generated release notes below for changes in this version.
+
+            ### 🔄 Auto-Update
+            The Desktop App includes auto-update functionality. You'll be notified when new versions are available!
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

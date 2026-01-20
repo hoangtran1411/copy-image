@@ -398,4 +398,3 @@ extensions:
 		t.Errorf("Expected extension '.bmp', got '%s'", cfg.Extensions[0])
 	}
 }
-

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copy Image Tool</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Inter font for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21,15 16,10 5,21"/>
+                </svg>
+                <h1>Copy Image</h1>
+            </div>
+            <div class="version-container">
+                <span class="version" id="versionText">v2.0.0</span>
+                <button class="update-btn" id="updateBtn" onclick="performUpdate()" title="Update available">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Source & Destination Card -->
+            <div class="card">
+                <div class="card-header">
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <h2>Folders</h2>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <label for="sourcePath">Source Folder</label>
+                        <div class="input-with-btn">
+                            <input type="text" id="sourcePath" placeholder="Select source folder..." readonly>
+                            <button class="browse-btn" onclick="selectSource()">Browse</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="destPath">Destination Folder</label>
+                        <div class="input-with-btn">
+                            <input type="text" id="destPath" placeholder="Select destination folder..." readonly>
+                            <button class="browse-btn" onclick="selectDest()">Browse</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Card -->
+            <div class="card">
+                <div class="card-header">
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <h2>Settings</h2>
+                </div>
+                <div class="card-body">
+                    <div class="settings-grid">
+                        <div class="input-group">
+                            <label for="workers">Workers</label>
+                            <input type="number" id="workers" value="10" min="1" max="50">
+                        </div>
+                        <div class="input-group">
+                            <label for="extensions">Extensions</label>
+                            <input type="text" id="extensions" placeholder=".jpg,.png,.gif">
+                        </div>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="dryRun">
+                            <span class="checkmark"></span>
+                            Dry Run (preview only)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Card -->
+            <div class="card">
+                <div class="card-header">
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    <h2>Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" id="scanBtn" onclick="scanFiles()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35"/>
+                            </svg>
+                            Scan Files
+                        </button>
+                        <button class="btn btn-primary" id="copyOverwriteBtn" onclick="startCopy(true)" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            Copy (Overwrite)
+                        </button>
+                        <button class="btn btn-success" id="copySkipBtn" onclick="startCopy(false)" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            Copy (Skip Existing)
+                        </button>
+                    </div>
+                    <div class="file-count" id="fileCount"></div>
+                </div>
+            </div>
+
+            <!-- Progress Card -->
+            <div class="card progress-card" id="progressCard">
+                <div class="card-header">
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="20" x2="12" y2="10"/>
+                        <line x1="18" y1="20" x2="18" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="16"/>
+                    </svg>
+                    <h2>Progress</h2>
+                    <button class="cancel-btn" id="cancelBtn" onclick="cancelCopy()">Cancel</button>
+                </div>
+                <div class="card-body">
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span id="progressText">0%</span>
+                            <span id="progressCount">0/0</span>
+                        </div>
+                    </div>
+                    <div class="current-file" id="currentFile"></div>
+                </div>
+            </div>
+
+            <!-- Results Card -->
+            <div class="card results-card" id="resultsCard">
+                <div class="card-header">
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <h2>Results</h2>
+                </div>
+                <div class="card-body">
+                    <div class="results-grid">
+                        <div class="result-item success">
+                            <span class="result-value" id="resultSuccess">0</span>
+                            <span class="result-label">Successful</span>
+                        </div>
+                        <div class="result-item failed">
+                            <span class="result-value" id="resultFailed">0</span>
+                            <span class="result-label">Failed</span>
+                        </div>
+                        <div class="result-item skipped">
+                            <span class="result-value" id="resultSkipped">0</span>
+                            <span class="result-label">Skipped</span>
+                        </div>
+                        <div class="result-item duration">
+                            <span class="result-value" id="resultDuration">0s</span>
+                            <span class="result-label">Duration</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Toast Container -->
+        <div id="toast-container"></div>
+    </div>
+
+    <!-- Wails Runtime -->
+    <script src="/wails/ipc.js"></script>
+    <script src="/wails/runtime.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

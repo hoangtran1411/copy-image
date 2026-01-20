@@ -31,8 +31,10 @@ Thumbs.db
 # Build output
 bin/
 dist/
+!frontend/dist/
 build/
 release/
+
 
 # Application specific
 quickvm.exe

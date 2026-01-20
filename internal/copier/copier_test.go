@@ -912,11 +912,11 @@ func TestGetFilesWithMixedExtensions(t *testing.T) {
 
 	// Create files with various extensions including uppercase
 	testFiles := []string{
-		"photo.JPG",      // uppercase
-		"image.jpg",      // lowercase
-		"document.PDF",   // should be excluded
-		"photo2.JPEG",    // uppercase
-		"picture.jpeg",   // lowercase
+		"photo.JPG",    // uppercase
+		"image.jpg",    // lowercase
+		"document.PDF", // should be excluded
+		"photo2.JPEG",  // uppercase
+		"picture.jpeg", // lowercase
 	}
 
 	for _, f := range testFiles {
@@ -944,5 +944,3 @@ func TestGetFilesWithMixedExtensions(t *testing.T) {
 		t.Errorf("Expected 4 files (.jpg and .jpeg), got %d", len(files))
 	}
 }
-
-
