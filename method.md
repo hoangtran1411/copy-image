@@ -1,78 +1,78 @@
 # CopyImageDMDGL - Method Documentation
 
-> Tài liệu này tổng hợp logic và phương thức chính của ứng dụng CopyImageDMDGL (C#) để hỗ trợ việc chuyển đổi sang Go.
+> This document summarizes the logic and main methods of the CopyImageDMDGL application (C#) to support the conversion to Go.
 
 ---
 
-## 📋 Mục đích ứng dụng
+## 📋 Application Purpose
 
-Ứng dụng console **sao chép hình ảnh hàng loạt** từ thư mục network share nguồn sang thư mục đích.
+A console application for **bulk image copying** from a network share source directory to a destination directory.
 
-**Use case thực tế:**
-- Copy hình mẫu sản phẩm từ server lưu trữ tạm (`HÌNH CHƯA TẢI`) sang server chính (`HinhAnh`)
-- Hỗ trợ ghi đè file nếu cần
-- Xử lý song song để tăng tốc độ copy
+**Real-world use case:**
+- Copy product sample images from temporary storage server (`IMAGES PENDING UPLOAD`) to main server (`Images`)
+- Support file overwrite when needed
+- Parallel processing to speed up copying
 
 ---
 
-## ⚙️ Cấu hình (Constants)
+## ⚙️ Configuration (Constants)
 
 ```
 SOURCE_PATH      = "\\192.1.1.1\DM_DON_GIA_LUONG\ROUTING 2023 + HÌNH MẪU\HINHMAUSP\HÌNH CHƯA TẢI"
 DESTINATION_PATH = "\\192.1.1.20\dmdgl$\HinhAnh"
 ```
 
-**Gợi ý cho Go:**
-- Sử dụng file config (JSON, YAML, TOML) hoặc environment variables
-- Hỗ trợ command-line flags: `--source`, `--dest`, `--overwrite`
+**Suggestions for Go:**
+- Use config file (JSON, YAML, TOML) or environment variables
+- Support command-line flags: `--source`, `--dest`, `--overwrite`
 
 ---
 
-## 🔄 Luồng xử lý chính (Main Flow)
+## 🔄 Main Flow
 
 ```
 START
   │
   ▼
 ┌─────────────────────────────────────┐
-│ 1. Hiển thị menu lựa chọn           │
-│    - 0: Không copy (thoát)          │
-│    - 1: Copy và ghi đè              │
+│ 1. Display selection menu           │
+│    - 0: Don't copy (exit)           │
+│    - 1: Copy and overwrite          │
 └─────────────────────────────────────┘
   │
   ▼
 ┌─────────────────────────────────────┐
 │ 2. Validate input                   │
-│    - Lặp cho đến khi nhập đúng 0/1  │
+│    - Loop until valid input (0/1)   │
 └─────────────────────────────────────┘
   │
   ▼
 ┌─────────────────────────────────────┐
-│ 3. Kiểm tra thư mục nguồn tồn tại   │
-│    - Nếu không tồn tại → thông báo  │
+│ 3. Check source directory exists    │
+│    - If not exists → notify         │
 └─────────────────────────────────────┘
   │
   ▼
 ┌─────────────────────────────────────┐
-│ 4. Lấy danh sách files              │
-│    - Nếu rỗng → thông báo           │
+│ 4. Get list of files                │
+│    - If empty → notify              │
 └─────────────────────────────────────┘
   │
   ▼
 ┌─────────────────────────────────────┐
-│ 5. Copy song song (Parallel)        │
-│    - Với mỗi file:                  │
-│      • Tạo đường dẫn đích           │
-│      • Copy file (ghi đè nếu chọn)  │
-│      • Xử lý exception              │
-│      • Log kết quả                  │
+│ 5. Copy in parallel                 │
+│    - For each file:                 │
+│      • Create destination path      │
+│      • Copy file (overwrite if set) │
+│      • Handle exceptions            │
+│      • Log result                   │
 └─────────────────────────────────────┘
   │
   ▼
 ┌─────────────────────────────────────┐
-│ 6. Hoàn thành                       │
-│    - Hiển thị thông báo             │
-│    - Đợi người dùng nhấn phím       │
+│ 6. Complete                         │
+│    - Display notification           │
+│    - Wait for user keypress         │
 └─────────────────────────────────────┘
   │
   ▼
@@ -81,44 +81,44 @@ END
 
 ---
 
-## 📦 Các Method chính
+## 📦 Main Methods
 
 ### 1. `Main()` - Entry Point
 
-**Mục đích:** Điều phối toàn bộ luồng xử lý
+**Purpose:** Orchestrate the entire processing flow
 
 **Logic:**
 ```
-1. In menu console
-2. Đọc input người dùng → validate (chỉ chấp nhận 0 hoặc 1)
-3. Nếu chọn 0 → thoát
-4. Nếu chọn 1:
-   a. Kiểm tra thư mục nguồn
-   b. Lấy danh sách files
-   c. Copy song song với option ghi đè = true
-5. In kết quả và đợi phím bấm
+1. Print console menu
+2. Read user input → validate (only accept 0 or 1)
+3. If selected 0 → exit
+4. If selected 1:
+   a. Check source directory
+   b. Get list of files
+   c. Copy in parallel with overwrite = true
+5. Print results and wait for keypress
 ```
 
-**Input:** Không có tham số
+**Input:** No parameters
 **Output:** Console output
 
 ---
 
 ### 2. `IsFileLocked(filePath string) bool`
 
-**Mục đích:** Kiểm tra xem file có đang bị lock (đang được mở bởi process khác) không
+**Purpose:** Check if a file is locked (being opened by another process)
 
 **Logic:**
 ```
-1. Thử mở file với mode ReadWrite và FileShare.None
-2. Nếu mở được → file không bị lock → return false
-3. Nếu IOException → file đang bị lock → return true
+1. Try to open file with ReadWrite mode and FileShare.None
+2. If successful → file is not locked → return false
+3. If IOException → file is locked → return true
 ```
 
-**Input:** `filePath` - Đường dẫn tuyệt đối đến file cần kiểm tra
-**Output:** `bool` - `true` nếu file đang bị lock, `false` nếu không
+**Input:** `filePath` - Absolute path to the file to check
+**Output:** `bool` - `true` if file is locked, `false` otherwise
 
-**Code C# gốc:**
+**Original C# code:**
 ```csharp
 static bool IsFileLocked(string filePath)
 {
@@ -136,7 +136,7 @@ static bool IsFileLocked(string filePath)
 }
 ```
 
-**Gợi ý cho Go:**
+**Suggestion for Go:**
 ```go
 func isFileLocked(filePath string) bool {
     file, err := os.OpenFile(filePath, os.O_RDWR, 0666)
@@ -152,41 +152,41 @@ func isFileLocked(filePath string) bool {
 
 ### 3. `CopyFile(sourcePath, destPath string, overwrite bool) error`
 
-**Mục đích:** Copy một file từ nguồn sang đích
+**Purpose:** Copy a file from source to destination
 
 **Logic:**
 ```
-1. Lấy tên file từ đường dẫn nguồn
-2. Tạo đường dẫn đích = destPath + fileName
+1. Get filename from source path
+2. Create destination path = destPath + fileName
 3. Copy file:
-   - Nếu overwrite = true → ghi đè nếu tồn tại
-   - Nếu overwrite = false → bỏ qua nếu tồn tại
-4. Xử lý exception:
-   - File đang bị lock → log và bỏ qua
-   - Lỗi khác → log lỗi
+   - If overwrite = true → overwrite if exists
+   - If overwrite = false → skip if exists
+4. Handle exceptions:
+   - File is locked → log and skip
+   - Other errors → log error
 ```
 
 **Input:**
-- `sourcePath` - Đường dẫn file nguồn
-- `destPath` - Thư mục đích
-- `overwrite` - Có ghi đè không
+- `sourcePath` - Source file path
+- `destPath` - Destination directory
+- `overwrite` - Whether to overwrite
 
-**Output:** `error` hoặc `nil`
+**Output:** `error` or `nil`
 
 ---
 
 ### 4. `CopyFilesParallel(files []string, destPath string, overwrite bool)`
 
-**Mục đích:** Copy nhiều files song song để tăng hiệu suất
+**Purpose:** Copy multiple files in parallel to increase performance
 
-**Logic (C# dùng Parallel.ForEach):**
+**Logic (C# uses Parallel.ForEach):**
 ```
-1. Với mỗi file trong danh sách (song song):
-   a. Gọi CopyFile()
-   b. Log kết quả: ✓ thành công hoặc ✗ thất bại
+1. For each file in the list (parallel):
+   a. Call CopyFile()
+   b. Log result: ✓ success or ✗ failure
 ```
 
-**Gợi ý cho Go (dùng goroutines + WaitGroup):**
+**Suggestion for Go (using goroutines + WaitGroup):**
 ```go
 func copyFilesParallel(files []string, destPath string, overwrite bool) {
     var wg sync.WaitGroup
@@ -213,55 +213,55 @@ func copyFilesParallel(files []string, destPath string, overwrite bool) {
 
 ---
 
-## 🛡️ Xử lý lỗi (Error Handling)
+## 🛡️ Error Handling
 
-| Loại lỗi | Xử lý |
-|----------|-------|
-| Thư mục nguồn không tồn tại | Log thông báo và thoát |
-| Không có file nào trong thư mục | Log thông báo và thoát |
-| File đang bị lock | Bỏ qua, log với prefix ✗ |
-| IOException khác | Log chi tiết lỗi với prefix ✗ |
-| Exception chung | Log và tiếp tục với file khác |
+| Error Type | Handling |
+|------------|----------|
+| Source directory doesn't exist | Log message and exit |
+| No files in directory | Log message and exit |
+| File is locked | Skip, log with ✗ prefix |
+| Other IOException | Log error details with ✗ prefix |
+| General exception | Log and continue with next file |
 
 ---
 
-## 🚀 Gợi ý cải tiến cho Go
+## 🚀 Improvement Suggestions for Go
 
-### 1. **CLI với Cobra/Flag**
+### 1. **CLI with Cobra/Flag**
 ```
 copyimage --source "/path/to/source" --dest "/path/to/dest" --overwrite --workers 10
 ```
 
 ### 2. **Progress Bar**
-Sử dụng thư viện như `github.com/schollz/progressbar/v3`
+Use library like `github.com/schollz/progressbar/v3`
 
-### 3. **Logging có cấu trúc**
-Dùng `log/slog` (Go 1.21+) hoặc `zerolog`/`zap`
+### 3. **Structured Logging**
+Use `log/slog` (Go 1.21+) or `zerolog`/`zap`
 
-### 4. **Retry mechanism**
-Thử lại khi copy thất bại (tối đa 3 lần)
+### 4. **Retry Mechanism**
+Retry when copy fails (max 3 attempts)
 
-### 5. **Dry-run mode**
-Option `--dry-run` để xem trước file sẽ được copy
+### 5. **Dry-run Mode**
+Option `--dry-run` to preview files that will be copied
 
-### 6. **Filter files**
-Option `--ext .jpg,.png` để chỉ copy một số loại file
+### 6. **Filter Files**
+Option `--ext .jpg,.png` to only copy certain file types
 
 ### 7. **Worker Pool**
-Kiểm soát số lượng goroutines đồng thời để tránh quá tải
+Control the number of concurrent goroutines to avoid overload
 
 ### 8. **Report/Summary**
 ```
-========== KẾT QUẢ ==========
-Tổng số files: 100
-Thành công:    95
-Thất bại:      3
-Bỏ qua:        2
-Thời gian:     5.2s
-=============================
+========== RESULTS ===========
+Total files:    100
+Successful:     95
+Failed:         3
+Skipped:        2
+Duration:       5.2s
+===============================
 ```
 
-### 9. **Config file**
+### 9. **Config File**
 ```yaml
 # config.yaml
 source: "\\\\192.1.1.1\\path\\to\\source"
@@ -276,7 +276,7 @@ extensions:
 
 ---
 
-## 📁 Cấu trúc project Go đề xuất
+## 📁 Suggested Go Project Structure
 
 ```
 copyimage/
@@ -299,19 +299,23 @@ copyimage/
 
 ---
 
-## ✅ Checklist chuyển đổi
+## ✅ Conversion Checklist
 
-- [ ] Tạo project Go mới với `go mod init`
-- [ ] Implement `config` package (load từ file/flags/env)
-- [ ] Implement `isFileLocked()` function
-- [ ] Implement `copyFile()` function
-- [ ] Implement `copyFilesParallel()` với worker pool
-- [ ] Thêm CLI flags (cobra hoặc flag package)
-- [ ] Thêm progress bar
-- [ ] Thêm summary report
-- [ ] Viết unit tests
-- [ ] Build và test trên Windows với UNC paths
+- [x] Create new Go project with `go mod init`
+- [x] Implement `config` package (load from file/flags/env)
+- [x] Implement `isFileLocked()` function
+- [x] Implement `copyFile()` function
+- [x] Implement `copyFilesParallel()` with worker pool
+- [x] Add CLI flags (cobra or flag package)
+- [x] Add progress bar
+- [x] Add summary report
+- [x] Write unit tests
+- [x] Build and test on Windows with UNC paths
+- [x] Add Wails desktop application
+- [x] Add auto-update functionality
+- [x] Add Copy Groups support
 
 ---
 
-*Tài liệu được tạo: 2026-01-19*
+*Document created: 2026-01-19*
+*Last updated: 2026-01-20 - Added Wails desktop app features*

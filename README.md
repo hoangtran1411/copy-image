@@ -2,7 +2,7 @@
 
 ![Go Version](https://img.shields.io/github/go-mod/go-version/hoangtran1411/copy-image)
 ![License](https://img.shields.io/github/license/hoangtran1411/copy-image)
-![Build Status](https://img.shields.io/github/actions/workflow/status/hoangtran1411/copy-image/go.yml?branch=main)
+![Build Status](https://img.shields.io/github/actions/workflow/status/hoangtran1411/copy-image/ci.yml?branch=main)
 
 > Bulk image copy tool with parallel processing support. Available as both CLI and Desktop application.
 
@@ -31,9 +31,9 @@
 copy-image/
 ├── cmd/copyimage/           # CLI entry point
 │   └── main.go
-├── main_wails.go            # Wails desktop entry point
-├── app.go                   # Wails app bindings
-├── updater.go               # Auto-update functionality
+├── main_wails.go            # Wails desktop entry point (Windows only)
+├── app.go                   # Wails app bindings (Windows only)
+├── updater.go               # Auto-update functionality (Windows only)
 ├── frontend/                # Desktop UI (HTML/CSS/JS)
 │   └── dist/
 │       ├── index.html
@@ -48,54 +48,56 @@ copy-image/
 └── Makefile                 # Build commands
 ```
 
+## 🚀 Installation
 
+### Requirements
+- Go 1.21 or later
+- For Desktop App: Windows 10/11, Wails CLI v2
 
-## 🚀 Cài đặt
-
-### Yêu cầu
-- Go 1.21 trở lên
-
-### Build từ source
+### Build from Source
 
 ```bash
 # Clone repo
-git clone <repo-url>
+git clone https://github.com/hoangtran1411/copy-image.git
 cd copy-image
 
 # Download dependencies
 go mod tidy
 
-# Build
+# Build CLI
 go build -o copyimage.exe ./cmd/copyimage
+
+# Build Desktop App (Windows only)
+wails build -clean
 ```
 
-## 📖 Cách sử dụng
+## 📖 Usage
 
-### Chế độ Interactive (mặc định)
+### Interactive Mode (Default)
 
 ```bash
-# Chạy với config file mặc định
+# Run with default config file
 ./copyimage.exe
 
-# Hoặc chỉ định config file
+# Or specify a config file
 ./copyimage.exe --config my-config.yaml
 ```
 
-Chương trình sẽ hiển thị menu:
+The program will display a menu:
 ```
 ┌─────────────────────────────────────┐
-│         LỰA CHỌN THAO TÁC           │
+│         SELECT OPERATION            │
 ├─────────────────────────────────────┤
-│  0: Không copy (thoát)              │
-│  1: Copy và ghi đè files cũ         │
-│  2: Copy và bỏ qua files đã tồn tại │
+│  0: Don't copy (exit)               │
+│  1: Copy and overwrite existing     │
+│  2: Copy and skip existing files    │
 └─────────────────────────────────────┘
 ```
 
-### Chế độ Command Line
+### Command Line Mode
 
 ```bash
-# Copy với các options
+# Copy with options
 ./copyimage.exe \
   --source "\\192.1.1.1\share\images" \
   --dest "\\192.1.1.20\backup\images" \
@@ -104,26 +106,26 @@ Chương trình sẽ hiển thị menu:
   --ext ".jpg,.png,.gif" \
   --interactive=false
 
-# Dry-run mode (xem trước, không copy thật)
+# Dry-run mode (preview without copying)
 ./copyimage.exe --dry-run --interactive=false
 
-# Xem version
+# Show version
 ./copyimage.exe --version
 ```
 
 ### CLI Flags
 
-| Flag | Mô tả | Mặc định |
-|------|-------|----------|
-| `--source` | Đường dẫn thư mục nguồn | (từ config) |
-| `--dest` | Đường dẫn thư mục đích | (từ config) |
-| `--overwrite` | Ghi đè file đã tồn tại | false |
-| `--workers` | Số lượng worker song song | 10 |
-| `--config` | Đường dẫn file config | config.yaml |
-| `--dry-run` | Chế độ xem trước | false |
-| `--ext` | Danh sách extension (phân cách bởi dấu phẩy) | (tất cả) |
-| `--interactive` | Chế độ tương tác | true |
-| `--version` | Hiển thị version | - |
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--source` | Source directory path | (from config) |
+| `--dest` | Destination directory path | (from config) |
+| `--overwrite` | Overwrite existing files | false |
+| `--workers` | Number of parallel workers | 10 |
+| `--config` | Path to config file | config.yaml |
+| `--dry-run` | Preview mode | false |
+| `--ext` | Comma-separated list of extensions | (all files) |
+| `--interactive` | Interactive mode | true |
+| `--version` | Show version | - |
 
 ## ⚙️ Configuration
 
@@ -156,26 +158,26 @@ max_retries: 3
 dry_run: false
 ```
 
-## 📊 Kết quả mẫu
+## 📊 Sample Output
 
 ```
 ╔═══════════════════════════════════════════════════════════╗
-║          📷 Bulk Image Copy Tool - v1.0.0                 ║
+║          📷 Bulk Image Copy Tool - v2.0.0                 ║
 ╚═══════════════════════════════════════════════════════════╝
 
-🔍 Đang quét thư mục nguồn...
-📁 Tìm thấy 100 file(s)
+🔍 Scanning source directory...
+📁 Found 100 file(s)
 
-🚀 Bắt đầu copy files...
-Copying files... [=================>          ] 75/100 7.5 it/s
+🚀 Starting file copy...
+Copying files... [==================>          ] 75/100 7.5 it/s
 
-========== KẾT QUẢ ==========
-Tổng số files: 100
-Thành công:    95 ✓
-Thất bại:      3 ✗
-Bỏ qua:        2 ⊘
-Thời gian:     5.20s
-==============================
+========== RESULTS ===========
+Total files:    100
+Successful:     95 ✓
+Failed:         3 ✗
+Skipped:        2 ⊘
+Duration:       5.20s
+===============================
 ```
 
 ## 🧪 Testing
@@ -184,17 +186,48 @@ Thời gian:     5.20s
 # Run tests
 go test ./...
 
-# Run tests với coverage
+# Run tests with coverage
 go test -cover ./...
 
 # Run tests verbose
 go test -v ./...
+
+# Generate coverage report
+make coverage
+```
+
+## 🔧 Makefile Commands
+
+```bash
+# Build CLI
+make build
+
+# Build Wails Desktop App
+make wails-build
+
+# Run Wails in development mode
+make wails-dev
+
+# Run all tests
+make test
+
+# Run linter
+make lint
+
+# Clean build artifacts
+make clean
 ```
 
 ## 📝 License
 
-MIT License
+MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🤝 Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
