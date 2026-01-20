@@ -663,6 +663,18 @@ body {
     outline: none;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    
+    /* Flexbox for icon alignment */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
 }
 
 .btn:disabled {

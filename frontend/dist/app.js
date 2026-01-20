@@ -208,7 +208,7 @@ async function scanFiles() {
             enableCopyButtons();
             showToast(`Found ${scannedFiles.length} file(s) ready to copy`, 'success');
         } else {
-            showToast('No files found matching the filter', 'info');
+            showToast('No files found. Check extensions filter or empty folder.', 'info');
             disableCopyButtons();
         }
     } catch (err) {
