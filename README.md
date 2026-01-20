@@ -1,5 +1,10 @@
 # Copy Image Tool 📷
 
+![Go Version](https://img.shields.io/github/go-mod/go-version/hoangtran1411/copy-image)
+![License](https://img.shields.io/github/license/hoangtran1411/copy-image)
+![Build Status](https://img.shields.io/github/actions/workflow/status/hoangtran1411/copy-image/go.yml?branch=main)
+
+
 > Công cụ sao chép hình ảnh hàng loạt từ thư mục nguồn sang thư mục đích, hỗ trợ xử lý song song để tăng tốc độ.
 
 ## ✨ Tính năng
