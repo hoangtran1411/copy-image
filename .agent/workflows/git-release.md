@@ -1,43 +1,43 @@
 ---
-description: Cách thực hiện commit và release chuẩn chuyên nghiệp sử dụng Git Release Management Skill
+description: Standard procedure for professional commits and releases using Git Release Management Skill
 ---
 
-Sử dụng workflow này để đảm bảo lịch sử dự án luôn sạch đẹp và các bản phát hành có đầy đủ thông tin.
+Use this workflow to ensure a clean project history and well-documented releases.
 
-### Bước 1: Commit công việc hàng ngày
-Khi bạn hoàn thành một thay đổi nhỏ (fix bug, thêm feature, sửa docs), hãy dùng lệnh:
+### Step 1: Daily Commits
+When you complete a small change (bug fix, feature, docs), use the following commands:
 ```bash
 git add .
 git commit -m "<type>(<scope>): <description>"
 ```
-*Gợi ý:* Bạn có thể bảo AI: "**Hãy commit các thay đổi vừa rồi theo chuẩn Conventional Commits**".
+*Tip:* You can ask AI: "**Commit recent changes following Conventional Commits standards**".
 
-### Bước 2: Chuẩn bị Release (Khi code đã ổn định)
-1. Kiểm tra lại các tính năng đã hoàn thiện.
-2. Cập nhật version trong code (ví dụ: `CurrentVersion` trong `updater.go`).
-3. Commit việc nâng version:
+### Step 2: Prepare Release (When code is stable)
+1. Verify that all features are complete and tested.
+2. Update the version in the code (e.g., `CurrentVersion` in `updater.go`).
+3. Commit the version bump:
    ```bash
    git add .
    git commit -m "chore: bump version to vX.Y.Z"
    ```
 
-### Bước 3: Tạo Tag Release chuyên nghiệp
-Sử dụng lệnh `git tag` với thông điệp đầy đủ:
+### Step 3: Create Professional Release Tag
+Use the `git tag` command with a comprehensive message:
 ```bash
-git tag -a vX.Y.Z -m "vX.Y.Z - [Tiêu đề Release]
+git tag -a vX.Y.Z -m "vX.Y.Z - [Release Title]
 
-🚀 [Tính năng mới]
+🚀 [New Features]
 - ...
-🛠️ [Sửa lỗi & Cải tiến]
+🛠️ [Fixes & Improvements]
 - ...
 "
 ```
-*Gợi ý:* Bạn có thể bảo AI: "**Hãy tạo release tag v2.2.0 cho những gì chúng ta đã làm từ bản v2.1.3 đến nay, trình bày đẹp mắt theo Skill đã có**".
+*Tip:* You can ask AI: "**Create release tag v2.2.0 for changes since v2.1.3, formatted beautifully according to the Skill**".
 
-### Bước 4: Đẩy lên GitHub
+### Step 4: Push to GitHub
 ```bash
 git push origin main --tags
 ```
 
 ---
-**Lưu ý:** Bạn có thể yêu cầu AI thực hiện riêng lẻ Bước 1 bất cứ lúc nào, và chỉ thực hiện Bước 3-4 khi bạn thực sự muốn ra mắt phiên bản mới.
+**Note:** You can ask AI to perform **Step 1** separately at any time. Only proceed to **Steps 3-4** when you are truly ready to release a new version.
