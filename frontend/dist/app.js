@@ -352,7 +352,9 @@ function hideProgressCard() {
 
 function showResultsCard(result) {
     const card = document.getElementById('resultsCard');
-    card.classList.add('active');
+    if (card) {
+        card.classList.add('active');
+    }
 
     document.getElementById('resultSuccess').textContent = result.successful;
     document.getElementById('resultFailed').textContent = result.failed;
@@ -361,7 +363,10 @@ function showResultsCard(result) {
 }
 
 function hideResultsCard() {
-    document.getElementById('resultsCard').classList.remove('active');
+    const card = document.getElementById('resultsCard');
+    if (card) {
+        card.classList.remove('active');
+    }
 }
 
 function resetProgress() {

@@ -142,7 +142,13 @@ func (c *Config) IsExtensionAllowed(ext string) bool {
 	// Normalize the extension to lowercase for case-insensitive matching
 	ext = strings.ToLower(ext)
 	for _, allowed := range c.Extensions {
-		if strings.ToLower(allowed) == ext {
+		// Handle user entering "jpg" instead of ".jpg"
+		cleanAllowed := strings.ToLower(strings.TrimSpace(allowed))
+		if !strings.HasPrefix(cleanAllowed, ".") {
+			cleanAllowed = "." + cleanAllowed
+		}
+
+		if cleanAllowed == ext {
 			return true
 		}
 	}

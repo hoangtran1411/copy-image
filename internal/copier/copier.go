@@ -176,9 +176,8 @@ func (c *Copier) CopyFileWithRetry(sourcePath string) CopyResult {
 			}
 		}
 		lastErr = err
-
-		// Exponential backoff: wait longer between each retry
-		// This helps with transient issues like network congestion
+		
+		// Exponential backoff
 		if attempt < c.config.MaxRetries {
 			time.Sleep(time.Duration(attempt+1) * 100 * time.Millisecond)
 		}
