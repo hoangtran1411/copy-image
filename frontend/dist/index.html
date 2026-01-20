@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,184 +9,233 @@
     <!-- Inter font for modern typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
+    <div class="app-background">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
     <div class="app-container">
-        <!-- Header Section -->
+        <!-- Header -->
         <header class="header">
             <div class="logo">
-                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21,15 16,10 5,21"/>
-                </svg>
-                <h1>Copy Image</h1>
+                <div class="logo-icon-bg">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21,15 16,10 5,21" />
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>Copy Image Tool</h1>
+                    <span class="version-badge" id="versionText">v2.0.0</span>
+                </div>
             </div>
-            <div class="version-container">
-                <span class="version" id="versionText">v2.0.0</span>
-                <button class="update-btn" id="updateBtn" onclick="performUpdate()" title="Update available">
+            <div class="header-actions">
+                <button class="icon-btn update-btn" id="updateBtn" onclick="performUpdate()" title="Update available">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7 10 12 15 17 10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
                 </button>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Source & Destination Card -->
-            <div class="card">
-                <div class="card-header">
-                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <h2>Folders</h2>
-                </div>
-                <div class="card-body">
-                    <div class="input-group">
-                        <label for="sourcePath">Source Folder</label>
-                        <div class="input-with-btn">
-                            <input type="text" id="sourcePath" placeholder="Select source folder..." readonly>
-                            <button class="browse-btn" onclick="selectSource()">Browse</button>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label for="destPath">Destination Folder</label>
-                        <div class="input-with-btn">
-                            <input type="text" id="destPath" placeholder="Select destination folder..." readonly>
-                            <button class="browse-btn" onclick="selectDest()">Browse</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Main Grid Layout -->
+        <main class="main-grid">
 
-            <!-- Settings Card -->
-            <div class="card">
-                <div class="card-header">
-                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                    </svg>
-                    <h2>Settings</h2>
+            <!-- Left Column: Copy Groups (Config) -->
+            <div class="panel left-panel glass-panel">
+                <div class="panel-header">
+                    <h2>Copy Groups</h2>
+                    <button class="add-btn" title="Add New Group">+</button>
                 </div>
-                <div class="card-body">
-                    <div class="settings-grid">
-                        <div class="input-group">
-                            <label for="workers">Workers</label>
-                            <input type="number" id="workers" value="10" min="1" max="50">
-                        </div>
-                        <div class="input-group">
-                            <label for="extensions">Extensions</label>
-                            <input type="text" id="extensions" placeholder=".jpg,.png,.gif">
-                        </div>
-                    </div>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="dryRun">
-                            <span class="checkmark"></span>
-                            Dry Run (preview only)
-                        </label>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Actions Card -->
-            <div class="card">
-                <div class="card-header">
-                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="5 3 19 12 5 21 5 3"/>
-                    </svg>
-                    <h2>Actions</h2>
-                </div>
-                <div class="card-body">
-                    <div class="action-buttons">
-                        <button class="btn btn-secondary" id="scanBtn" onclick="scanFiles()">
+                <div class="groups-list">
+                    <!-- Default Group (Single Source/Dest mode) -->
+                    <div class="group-card active">
+                        <div class="group-header">
+                            <h3>Default Group</h3>
+                            <div class="status-dot"></div>
+                        </div>
+
+                        <!-- Source Config -->
+                        <div class="path-config source" onclick="selectSource()">
+                            <div class="path-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                                </svg>
+                            </div>
+                            <div class="path-details">
+                                <label>Source Folder</label>
+                                <input type="text" id="sourcePath" placeholder="Select source..." readonly
+                                    class="seamless-input">
+                            </div>
+                        </div>
+
+                        <div class="connection-arrow">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="11" cy="11" r="8"/>
-                                <path d="M21 21l-4.35-4.35"/>
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <polyline points="19 12 12 19 5 12" />
                             </svg>
-                            Scan Files
-                        </button>
-                        <button class="btn btn-primary" id="copyOverwriteBtn" onclick="startCopy(true)" disabled>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                            Copy (Overwrite)
-                        </button>
-                        <button class="btn btn-success" id="copySkipBtn" onclick="startCopy(false)" disabled>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                            Copy (Skip Existing)
-                        </button>
+                        </div>
+
+                        <!-- Dest Config -->
+                        <div class="path-config dest" onclick="selectDest()">
+                            <div class="path-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                                </svg>
+                            </div>
+                            <div class="path-details">
+                                <label>Destination Folder</label>
+                                <input type="text" id="destPath" placeholder="Select destination..." readonly
+                                    class="seamless-input">
+                            </div>
+                        </div>
+
+                        <!-- Settings Mini-Inline -->
+                        <div class="settings-inline">
+                            <div class="mini-setting">
+                                <label>Workers</label>
+                                <input type="number" id="workers" value="10" min="1" max="50">
+                            </div>
+                            <div class="mini-setting wide">
+                                <label>Extensions</label>
+                                <input type="text" id="extensions" placeholder=".jpg,.png">
+                            </div>
+                        </div>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="dryRun">
+                                <span class="checkmark"></span>
+                                Dry Run
+                            </label>
+                        </div>
                     </div>
-                    <div class="file-count" id="fileCount"></div>
+
+                    <!-- Placeholder for visual illustration -->
+                    <div class="group-card placeholder">
+                        <div class="group-header">
+                            <h3>Backup Group</h3>
+                        </div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary full-width" id="scanBtn" onclick="scanFiles()">
+                    Scan Files
+                </button>
+            </div>
+
+            <!-- Center Column: Progress Visualization -->
+            <div class="panel center-panel glass-panel" id="progressCard">
+                <div class="progress-visualization">
+                    <div class="progress-ring-container">
+                        <div class="glow-ring"></div>
+                        <div class="stats-center">
+                            <div class="percent-value" id="progressText">0%</div>
+                            <div class="percent-label" id="progressStatus">Ready</div>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" id="progressFill"></div>
+                            <div class="progress-glow"></div>
+                        </div>
+                    </div>
+
+                    <div class="current-file-display">
+                        <div id="currentFile" class="file-name">Waiting to start...</div>
+                        <div class="file-count-badge" id="progressCount">0/0</div>
+                        <div class="file-count" id="fileCount" style="display:none"></div>
+                        <!-- Hidden legacy support -->
+                    </div>
+
+                    <button class="btn cancel-btn" id="cancelBtn" onclick="cancelCopy()" style="display: none;">
+                        Stop Operation
+                    </button>
                 </div>
             </div>
 
-            <!-- Progress Card -->
-            <div class="card progress-card" id="progressCard">
-                <div class="card-header">
-                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="20" x2="12" y2="10"/>
-                        <line x1="18" y1="20" x2="18" y2="4"/>
-                        <line x1="6" y1="20" x2="6" y2="16"/>
-                    </svg>
-                    <h2>Progress</h2>
-                    <button class="cancel-btn" id="cancelBtn" onclick="cancelCopy()">Cancel</button>
+            <!-- Right Column: Summary & Actions -->
+            <div class="panel right-panel glass-panel">
+                <div class="panel-header">
+                    <h2>Success Summary</h2>
                 </div>
-                <div class="card-body">
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progressFill"></div>
+
+                <div class="summary-cards">
+                    <!-- Success -->
+                    <div class="stat-card success-card">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
                         </div>
-                        <div class="progress-info">
-                            <span id="progressText">0%</span>
-                            <span id="progressCount">0/0</span>
+                        <div class="stat-info">
+                            <span class="stat-label">SUCCESS</span>
+                            <span class="stat-value" id="resultSuccess">0</span>
+                            <span class="stat-desc">Images Copied</span>
                         </div>
                     </div>
-                    <div class="current-file" id="currentFile"></div>
+
+                    <!-- Failed -->
+                    <div class="stat-card failed-card">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">FAILED</span>
+                            <span class="stat-value" id="resultFailed">0</span>
+                            <span class="stat-desc">Errors</span>
+                        </div>
+                    </div>
+
+                    <!-- Skipped -->
+                    <div class="stat-card skipped-card">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="10" y1="4" x2="10" y2="20" />
+                                <line x1="14" y1="4" x2="14" y2="20" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">SKIPPED</span>
+                            <span class="stat-value" id="resultSkipped">0</span>
+                            <span class="stat-desc">Existing</span>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="action-footer">
+                    <button class="btn btn-primary-glow" id="copyOverwriteBtn" onclick="startCopy(true)" disabled>
+                        Copy (Overwrite)
+                    </button>
+                    <button class="btn btn-outline" id="copySkipBtn" onclick="startCopy(false)" disabled>
+                        Copy (Skip)
+                    </button>
+                </div>
+
+                <!-- Hidden legacy elements required by existing JS -->
+                <span id="resultDuration" style="display:none"></span>
             </div>
 
-            <!-- Results Card -->
-            <div class="card results-card" id="resultsCard">
-                <div class="card-header">
-                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                    <h2>Results</h2>
-                </div>
-                <div class="card-body">
-                    <div class="results-grid">
-                        <div class="result-item success">
-                            <span class="result-value" id="resultSuccess">0</span>
-                            <span class="result-label">Successful</span>
-                        </div>
-                        <div class="result-item failed">
-                            <span class="result-value" id="resultFailed">0</span>
-                            <span class="result-label">Failed</span>
-                        </div>
-                        <div class="result-item skipped">
-                            <span class="result-value" id="resultSkipped">0</span>
-                            <span class="result-label">Skipped</span>
-                        </div>
-                        <div class="result-item duration">
-                            <span class="result-value" id="resultDuration">0s</span>
-                            <span class="result-label">Duration</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </main>
 
-        <!-- Toast Container -->
+        <!-- Toast -->
         <div id="toast-container"></div>
     </div>
 
@@ -194,4 +244,5 @@
     <script src="/wails/runtime.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
