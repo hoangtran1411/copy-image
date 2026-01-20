@@ -15,16 +15,16 @@ let isCopying = false;
  * Initialize the application when DOM is ready.
  * Sets up event listeners for backend events and loads initial data.
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Listen for progress updates from Go backend
     if (typeof window.runtime !== 'undefined') {
         // Copy progress events
         window.runtime.EventsOn('copy:progress', handleProgressEvent);
         window.runtime.EventsOn('copy:complete', handleCompleteEvent);
         window.runtime.EventsOn('copy:cancelled', handleCancelledEvent);
-        
+
         // Update progress events
-        window.runtime.EventsOn('update:progress', function(message) {
+        window.runtime.EventsOn('update:progress', function (message) {
             showToast(message, 'info');
         });
     }
@@ -74,12 +74,15 @@ async function loadConfig() {
 async function checkForUpdates() {
     try {
         updateInfo = await window.go.main.App.CheckForUpdate();
-        
+
         if (updateInfo && updateInfo.available) {
             const updateBtn = document.getElementById('updateBtn');
             updateBtn.classList.add('visible');
             updateBtn.title = `Update to ${updateInfo.latestVersion} available! Click to install.`;
             console.log('Update available:', updateInfo.latestVersion);
+        } else {
+            const updateBtn = document.getElementById('updateBtn');
+            updateBtn.classList.remove('visible');
         }
     } catch (err) {
         // Network errors are expected when offline - fail silently
@@ -200,7 +203,7 @@ async function scanFiles() {
     try {
         scannedFiles = await window.go.main.App.ScanFiles();
         updateFileCount();
-        
+
         if (scannedFiles.length > 0) {
             enableCopyButtons();
             showToast(`Found ${scannedFiles.length} file(s) ready to copy`, 'success');

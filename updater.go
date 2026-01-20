@@ -19,8 +19,8 @@ import (
 // CurrentVersion holds the application version.
 // This should be updated when releasing new versions.
 // For production builds, use ldflags to inject the version at build time:
-// go build -ldflags "-X main.CurrentVersion=v2.1.2"
-var CurrentVersion = "v2.1.2"
+// go build -ldflags "-X main.CurrentVersion=v2.1.3"
+var CurrentVersion = "v2.1.3"
 
 // GitHubOwner and GitHubRepo identify the repository for update checks.
 // These constants define where to look for new releases on GitHub.
