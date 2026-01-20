@@ -13,7 +13,8 @@
 
 <p align="center">
   <strong>Effortless, high-speed bulk image migration for professionals.</strong><br>
-  Available as a modern <strong>Desktop GUI</strong> and a powerful <strong>CLI</strong>.
+  Available as a modern <strong>Desktop GUI</strong> and a powerful <strong>CLI</strong>.<br><br>
+  🎓 <strong><a href="./learning.md">New to Go? Check out our Learning Guide!</a></strong>
 </p>
 
 ---
