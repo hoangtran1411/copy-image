@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -18,8 +19,8 @@ import (
 // CurrentVersion holds the application version.
 // This should be updated when releasing new versions.
 // For production builds, use ldflags to inject the version at build time:
-// go build -ldflags "-X main.CurrentVersion=v2.1.0"
-var CurrentVersion = "v2.1.0"
+// go build -ldflags "-X main.CurrentVersion=v2.1.1"
+var CurrentVersion = "v2.1.1"
 
 // GitHubOwner and GitHubRepo identify the repository for update checks.
 // These constants define where to look for new releases on GitHub.
@@ -210,23 +211,33 @@ func (a *App) PerformUpdate(downloadURL string) (bool, error) {
 	// This approach is necessary on Windows because you can't replace
 	// a running executable directly.
 	batchPath := filepath.Join(tempDir, "update_copyimage.bat")
+	// Optimized batch script for Windows:
+	// - timeout: waits for the app to close
+	// - del: removes old exe
+	// - move: installs new exe
+	// - start: launches the updated app
+	// - (goto) trick: safely deletes the script itself after execution
 	batchContent := fmt.Sprintf(`@echo off
 timeout /t 2 /nobreak >nul
-del "%s"
+del /f /q "%s"
 move /y "%s" "%s"
 start "" "%s"
-del "%%~f0"
+(goto) 2>nul & del "%%~f0"
 `, exePath, tempFile, exePath, exePath)
 
-	// Write batch script with restricted permissions.
-	// Using 0600 for security (only owner can read/write).
-	if err := os.WriteFile(batchPath, []byte(batchContent), 0600); err != nil {
+	// Write batch script with standard permissions for Windows (0666)
+	if err := os.WriteFile(batchPath, []byte(batchContent), 0666); err != nil {
 		return false, fmt.Errorf("failed to create update script: %w", err)
 	}
 
-	// Run the batch script minimized (hidden).
-	// The /min flag prevents a command window from appearing.
-	cmd := exec.Command("cmd", "/c", "start", "/min", "", batchPath)
+	// Run the batch script as a detached process to ensure it continues
+	// running after the main application exits.
+	cmd := exec.Command("cmd", "/c", batchPath)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		HideWindow:    true,
+		CreationFlags: 0x00000008, // DETACHED_PROCESS
+	}
+	
 	if err := cmd.Start(); err != nil {
 		return false, fmt.Errorf("failed to start update script: %w", err)
 	}
