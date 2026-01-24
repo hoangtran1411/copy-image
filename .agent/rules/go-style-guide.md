@@ -4,6 +4,8 @@ trigger: always_on
 
 # Go Style Guide - Copy Image Project
 
+> **Core Rules** - For full idioms reference, see `go-idioms-reference.md`
+
 This project is a **file copy utility** built with:
 - **Wails v2** for the Desktop GUI (Windows)
 - **CLI mode** with progressbar for terminal usage
@@ -13,10 +15,10 @@ This project is a **file copy utility** built with:
 
 ## Code Style
 
-- "Ensure all Go code is formatted using `gofmt` or `goimports`. Run `golangci-lint run ./...` before committing."
-- "Adhere to [Effective Go](https://golang.org/doc/effective_go.html) and [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)."
-- "Organize code into domain-specific packages within `internal/` (e.g., `internal/config`, `internal/copier`, `internal/utils`)."
-- "Keep Wails-specific code (app.go, updater.go, main_wails.go) in the root package with `//go:build windows` constraint."
+- Format with `gofmt`/`goimports`. Run `golangci-lint run ./...` before commit.
+- Adhere to [Effective Go](https://go.dev/doc/effective_go) and [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments).
+- Organize code into domain-specific packages within `internal/` (e.g., `internal/config`, `internal/copier`, `internal/utils`).
+- Keep Wails-specific code (app.go, updater.go, main_wails.go) in the root package with `//go:build windows` constraint.
 
 ## Project Structure
 
@@ -37,80 +39,82 @@ copy-image/
 
 ## Error Handling
 
-- "Always wrap errors using `%w`: `fmt.Errorf(\"context: %w\", err)`. This is critical for tracing file I/O errors."
-- "Implement 'fail fast' logic using guard clauses to minimize indentation."
-- "Handle close errors in `defer` statements where appropriate, or use `defer func() { _ = file.Close() }()` pattern."
+- Always wrap errors using `%w`: `fmt.Errorf("context: %w", err)`. Critical for tracing file I/O errors.
+- Implement 'fail fast' logic using guard clauses.
+- Handle close errors in `defer` statements: `defer func() { _ = file.Close() }()`
+- Do not log and return the same error.
 
 ## Context & Concurrency
 
-- "Functions performing I/O or long-running operations MUST accept `context.Context` as the first argument for cancellation support."
-- "Use `context` to manage timeouts and cancellations for copy operations (see `CopyFilesParallelWithEvents`)."
-- "Use `sync/atomic` for counters shared across goroutines."
-- "Use semaphore pattern (`chan struct{}`) to limit concurrent workers."
+- Functions performing I/O or long-running operations MUST accept `context.Context` as the first argument.
+- Use `context` to manage timeouts/cancellations (e.g., `CopyFilesParallelWithEvents`).
+- Use `sync/atomic` for counters shared across goroutines.
+- Use semaphore pattern (`chan struct{}`) to limit concurrent workers.
 
 ## Wails Integration
 
-- "All Wails-bound methods must be on the `*App` struct and be exported (PascalCase)."
-- "Use `runtime.EventsEmit()` for progress updates to frontend."
-- "Return structs with `json` tags for frontend consumption (e.g., `ProgressEvent`, `CopyResult`)."
-- "Files with Wails bindings require `//go:build windows` constraint."
+- Bound methods on `*App` struct must be exported (PascalCase).
+- Use `runtime.EventsEmit()` for progress updates to frontend.
+- Return structs with `json` tags for frontend consumption.
+- Files with Wails bindings require `//go:build windows` constraint.
 
 ## CLI Mode (progressbar)
 
-- "Use `github.com/schollz/progressbar/v3` for terminal progress display."
-- "Keep CLI logic in `cmd/copyimage/` separate from core business logic."
-- "Support both interactive and non-interactive modes."
+- Use `github.com/schollz/progressbar/v3` for terminal progress display.
+- Keep CLI logic in `cmd/copyimage/` separate from core business logic.
+- Support both interactive and non-interactive modes.
 
 ## Configuration
 
-- "Use `gopkg.in/yaml.v3` for configuration serialization."
-- "Always provide `DefaultConfig()` function with sensible defaults."
-- "Add both `yaml` and `json` struct tags for dual compatibility (file storage + Wails binding)."
-- "Validate configuration before use with `Config.Validate()` method."
+- Use `gopkg.in/yaml.v3` for configuration serialization.
+- Always provide `DefaultConfig()` function with sensible defaults.
+- Add both `yaml` and `json` struct tags.
+- Validate configuration via `Config.Validate()`.
 
-## Documentation
+## Testing & Linting
 
-- "Every exported function, variable, and type must have clear documentation comments explaining 'Why' rather than just 'What'."
-- "Document edge cases and design decisions in comments (e.g., why certain linter rules are disabled)."
-
-## Testing
-
-- "Prioritize Table-driven tests combined with `t.Run` for comprehensive test coverage."
-- "Use build tags (`//go:build windows`) for Windows-specific tests."
-- "Mock file system operations for unit tests when possible."
-- "Target minimum 40% code coverage (CI enforced)."
-
-## Linting (golangci-lint)
-
-The project uses these linters (see `.golangci.yml`):
-- `errcheck`, `gosimple`, `govet`, `ineffassign`, `staticcheck`, `unused`
-- `gofmt`, `goimports`, `misspell`, `bodyclose`, `gocritic`, `gosec`
-
-Excluded patterns:
-- `frontend/` and `build/` directories are excluded
-- Wails-specific files (`app.go`, `updater.go`, etc.) are excluded from CI lint due to Windows-only constraints
-
-## Efficiency & Tone
-
-- "Avoid greetings, apologies, or meta-commentary; focus strictly on code and execution logs."
-- "Provide code as minimal diffs/blocks whenever possible."
+- Table-driven tests with `t.Run`.
+- Target 40% coverage (CI enforced).
+- Use build tags (`//go:build windows`) for Windows-specific tests.
+- Mock file system operations for unit tests.
+- Lint with `golangci-lint`: `errcheck`, `gosimple`, `govet`, `staticcheck`, `bodyclose`, `gosec`, etc.
 
 ---
 
-## Reference & Resource Mapping
+## AI Agent Rules (Critical)
 
-### Wails Desktop App
-- **Reference:** [wailsapp/wails](https://github.com/wailsapp/wails)
-- **Guideline:** Follow Wails v2 patterns for Go-to-frontend binding. Use event system for real-time updates.
+### Enforcement
 
-### CLI Progress Display
-- **Reference:** [schollz/progressbar](https://github.com/schollz/progressbar)
-- **Guideline:** Use progressbar for CLI mode with proper terminal detection.
+- Prefer clarity over cleverness
+- Prefer idiomatic Go over Java/C#/JS patterns
+- If unsure, follow Effective Go first
 
-### Configuration
-- **Reference:** [gopkg.in/yaml.v3](https://gopkg.in/yaml.v3)
-- **Guideline:** Use YAML for human-readable configuration files.
+### Context Accuracy
 
-### Linting
-- **Reference:** [golangci/golangci-lint](https://github.com/golangci/golangci-lint)
-- **Guideline:** Run `golangci-lint run ./...` before committing. Fix all issues to pass CI.
+- Documentation links ≠ guarantees of correctness
+- For external APIs: prefer explicit function signatures in context
+- State assumptions when context is missing
+
+### Library Version Awareness
+
+- Check `go.mod` for actual versions before suggesting APIs
+- LLMs hallucinate APIs for newer features not in training data
+- Prefer stable APIs over experimental features
+
+### Context Engineering
+
+- Right context at right time, not all docs at once
+- Reference existing codebase patterns first
+- State missing context rather than guessing
+
+---
+
+## Quick Reference Links
+
+- [Effective Go](https://go.dev/doc/effective_go)
+- [Wails v2](https://github.com/wailsapp/wails)
+- [schollz/progressbar](https://github.com/schollz/progressbar)
+- [gopkg.in/yaml.v3](https://gopkg.in/yaml.v3)
+- [golangci-lint](https://github.com/golangci/golangci-lint)
+
+> **Full Reference:** See `.agent/rules/go-idioms-reference.md` for detailed idioms, code examples, and best practices.
