@@ -94,7 +94,12 @@ func (c *Copier) GetFiles() ([]string, error) {
 // CopyFile copies a single file from source to the configured destination.
 // If overwrite is false and the destination file exists, the copy is skipped.
 // The function ensures the destination directory exists before copying.
-func (c *Copier) CopyFile(sourcePath string, overwrite bool) error {
+func (c *Copier) CopyFile(ctx context.Context, sourcePath string, overwrite bool) error {
+	// Check for cancellation before starting
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	fileName := filepath.Base(sourcePath)
 	destPath := filepath.Join(c.config.Destination, fileName)
 
@@ -133,6 +138,10 @@ func (c *Copier) CopyFile(sourcePath string, overwrite bool) error {
 	}()
 
 	// Copy content using buffered I/O
+	// Only CopyBuffer allows cancellation if we implement a custom reader,
+	// but standard Copy respects context if passed to a wrapper, or we just check before.
+	// For now, we stick to io.Copy but at least we checked context at start.
+	// A more advanced version would use a cancelable reader.
 	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
 		return fmt.Errorf("failed to copy file content: %w", err)
@@ -150,7 +159,7 @@ func (c *Copier) CopyFile(sourcePath string, overwrite bool) error {
 // CopyFileWithRetry attempts to copy a file with automatic retries on failure.
 // It uses exponential backoff between retries to handle transient errors
 // like network hiccups or temporary file locks.
-func (c *Copier) CopyFileWithRetry(sourcePath string) CopyResult {
+func (c *Copier) CopyFileWithRetry(ctx context.Context, sourcePath string) CopyResult {
 	fileName := filepath.Base(sourcePath)
 	destPath := filepath.Join(c.config.Destination, fileName)
 
@@ -166,7 +175,17 @@ func (c *Copier) CopyFileWithRetry(sourcePath string) CopyResult {
 
 	var lastErr error
 	for attempt := 0; attempt <= c.config.MaxRetries; attempt++ {
-		err := c.CopyFile(sourcePath, c.config.Overwrite)
+		// Check context before each attempt
+		if err := ctx.Err(); err != nil {
+			return CopyResult{
+				FileName: fileName,
+				Success:  false,
+				Skipped:  false,
+				Error:    err,
+			}
+		}
+
+		err := c.CopyFile(ctx, sourcePath, c.config.Overwrite)
 		if err == nil {
 			return CopyResult{
 				FileName: fileName,
@@ -179,7 +198,17 @@ func (c *Copier) CopyFileWithRetry(sourcePath string) CopyResult {
 
 		// Exponential backoff
 		if attempt < c.config.MaxRetries {
-			time.Sleep(time.Duration(attempt+1) * 100 * time.Millisecond)
+			select {
+			case <-ctx.Done():
+				return CopyResult{
+					FileName: fileName,
+					Success:  false,
+					Skipped:  false,
+					Error:    ctx.Err(),
+				}
+			case <-time.After(time.Duration(attempt+1) * 100 * time.Millisecond):
+				// Continue to next attempt
+			}
 		}
 	}
 
@@ -233,7 +262,8 @@ func (c *Copier) CopyFilesParallel(files []string) CopySummary {
 				fmt.Printf("  [DRY-RUN] Would copy: %s\n", filepath.Base(f))
 				atomic.AddInt32(&successful, 1)
 			} else {
-				result := c.CopyFileWithRetry(f)
+				// CLI mode doesn't have a cancellation context yet, using Background
+				result := c.CopyFileWithRetry(context.Background(), f)
 
 				if result.Success {
 					atomic.AddInt32(&successful, 1)
@@ -317,7 +347,7 @@ func (c *Copier) CopyFilesParallelWithEvents(ctx context.Context, files []string
 				status = "success"
 				atomic.AddInt32(&successful, 1)
 			} else {
-				result := c.CopyFileWithRetry(f)
+				result := c.CopyFileWithRetry(ctx, f)
 
 				if result.Success {
 					status = "success"

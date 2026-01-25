@@ -154,7 +154,8 @@ func parseVersion(v string) [3]int {
 
 	for i := 0; i < len(parts) && i < 3; i++ {
 		// Use Sscanf for safe integer parsing - invalid inputs become 0.
-		fmt.Sscanf(parts[i], "%d", &result[i])
+		// We explicitly ignore the error because we want best-effort parsing (0 default)
+		_, _ = fmt.Sscanf(parts[i], "%d", &result[i])
 	}
 
 	return result
@@ -162,7 +163,7 @@ func parseVersion(v string) [3]int {
 
 // PerformUpdate downloads and installs a new version of the application.
 // This is a complex operation that:
-// 1. Downloads the new executable to a temp file
+// 1. Downloads the new executable to a secure temp file
 // 2. Creates a batch script to replace the running executable
 // 3. Exits the current app and lets the batch script do the swap
 //
@@ -181,8 +182,12 @@ func (a *App) PerformUpdate(downloadURL string) (bool, error) {
 	}
 	exePath, _ = filepath.Abs(exePath)
 
-	tempDir := os.TempDir()
-	tempFile := filepath.Join(tempDir, "copyimage_update.exe")
+	// SECURITY: Use os.CreateTemp to avoid predictable temporary filenames (TOCTOU)
+	tempFile, err := os.CreateTemp("", "copyimage_update_*.exe")
+	if err != nil {
+		return false, fmt.Errorf("failed to create temp file: %w", err)
+	}
+	tempPath := tempFile.Name()
 
 	// Notify the frontend that download is starting.
 	runtime.EventsEmit(a.ctx, "update:progress", "Downloading update...")
@@ -190,39 +195,43 @@ func (a *App) PerformUpdate(downloadURL string) (bool, error) {
 	// Download the new version.
 	resp, err := http.Get(downloadURL)
 	if err != nil {
+		_ = tempFile.Close()
+		_ = os.Remove(tempPath)
 		return false, fmt.Errorf("failed to download update: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		_ = tempFile.Close()
+		_ = os.Remove(tempPath)
 		return false, fmt.Errorf("download failed with status: %d", resp.StatusCode)
 	}
 
-	// Create the temp file for the download.
-	out, err := os.Create(tempFile)
-	if err != nil {
-		return false, fmt.Errorf("failed to create temp file: %w", err)
-	}
-
 	// Copy the downloaded content to the temp file.
-	_, err = io.Copy(out, resp.Body)
-	out.Close()
+	_, err = io.Copy(tempFile, resp.Body)
+	// Explicitly close the file to ensure flush.
+	// We handle the error if closes fails, but prioritize the copy error if it exists.
+	closeErr := tempFile.Close()
 	if err != nil {
+		_ = os.Remove(tempPath)
 		return false, fmt.Errorf("failed to save update: %w", err)
+	}
+	if closeErr != nil {
+		_ = os.Remove(tempPath)
+		return false, fmt.Errorf("failed to close temp file: %w", closeErr)
 	}
 
 	runtime.EventsEmit(a.ctx, "update:progress", "Installing update...")
 
-	// Create a batch script that will:
-	// 1. Wait for this process to exit (timeout)
-	// 2. Delete the old executable
-	// 3. Move the new executable to the original location
-	// 4. Start the new executable
-	// 5. Delete itself
-	//
-	// This approach is necessary on Windows because you can't replace
-	// a running executable directly.
-	batchPath := filepath.Join(tempDir, "update_copyimage.bat")
+	// Create a batch script for the update process
+	// SECURITY: Use CreateTemp for the batch script too
+	batchFile, err := os.CreateTemp("", "update_copyimage_*.bat")
+	if err != nil {
+		_ = os.Remove(tempPath)
+		return false, fmt.Errorf("failed to create batch script: %w", err)
+	}
+	batchPath := batchFile.Name()
+
 	// Optimized batch script for Windows:
 	// - timeout: waits for the app to close
 	// - del: removes old exe
@@ -235,11 +244,19 @@ del /f /q "%s"
 move /y "%s" "%s"
 start "" "%s"
 (goto) 2>nul & del "%%~f0"
-`, exePath, tempFile, exePath, exePath)
+`, exePath, tempPath, exePath, exePath)
 
-	// Write batch script with standard permissions for Windows (0666)
-	if err := os.WriteFile(batchPath, []byte(batchContent), 0666); err != nil {
-		return false, fmt.Errorf("failed to create update script: %w", err)
+	if _, err := batchFile.Write([]byte(batchContent)); err != nil {
+		_ = batchFile.Close()
+		_ = os.Remove(batchPath)
+		_ = os.Remove(tempPath)
+		return false, fmt.Errorf("failed to write batch script: %w", err)
+	}
+
+	if err := batchFile.Close(); err != nil {
+		_ = os.Remove(batchPath)
+		_ = os.Remove(tempPath)
+		return false, fmt.Errorf("failed to close batch script: %w", err)
 	}
 
 	// Run the batch script as a detached process to ensure it continues
@@ -249,13 +266,16 @@ start "" "%s"
 		HideWindow:    true,
 		CreationFlags: 0x00000008, // DETACHED_PROCESS
 	}
-	
+
 	if err := cmd.Start(); err != nil {
+		_ = os.Remove(batchPath)
+		_ = os.Remove(tempPath)
 		return false, fmt.Errorf("failed to start update script: %w", err)
 	}
 
 	// Exit the application to allow the batch script to replace the executable.
 	runtime.Quit(a.ctx)
 
+	// In case Quit doesn't effectively kill us instantly from this goroutine's perspective
 	return true, nil
 }

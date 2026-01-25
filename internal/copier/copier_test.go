@@ -1,6 +1,7 @@
 package copier
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -43,7 +44,7 @@ func TestCopyFile(t *testing.T) {
 	c := New(cfg)
 
 	// Test copy
-	err := c.CopyFile(srcFile, true)
+	err := c.CopyFile(context.Background(), srcFile, true)
 	if err != nil {
 		t.Errorf("CopyFile failed: %v", err)
 	}
@@ -90,7 +91,7 @@ func TestCopyFileNoOverwrite(t *testing.T) {
 	c := New(cfg)
 
 	// Test copy without overwrite
-	err := c.CopyFile(srcFile, false)
+	err := c.CopyFile(context.Background(), srcFile, false)
 	if err != nil {
 		t.Errorf("CopyFile failed: %v", err)
 	}
@@ -256,7 +257,7 @@ func TestCopyFileWithRetrySuccess(t *testing.T) {
 
 	c := New(cfg)
 
-	result := c.CopyFileWithRetry(srcFile)
+	result := c.CopyFileWithRetry(context.Background(), srcFile)
 
 	if !result.Success {
 		t.Error("Expected Success=true")
@@ -295,7 +296,7 @@ func TestCopyFileWithRetrySkipped(t *testing.T) {
 
 	c := New(cfg)
 
-	result := c.CopyFileWithRetry(srcFile)
+	result := c.CopyFileWithRetry(context.Background(), srcFile)
 
 	if result.Success {
 		t.Error("Expected Success=false for skipped file")
@@ -407,7 +408,7 @@ func TestCopyFileSourceNotFound(t *testing.T) {
 	c := New(cfg)
 
 	// Try to copy non-existent file
-	err := c.CopyFile(filepath.Join(srcDir, "nonexistent.txt"), true)
+	err := c.CopyFile(context.Background(), filepath.Join(srcDir, "nonexistent.txt"), true)
 	if err == nil {
 		t.Error("Expected error for non-existent source file")
 	}
@@ -428,7 +429,7 @@ func TestCopyFileWithRetryFailed(t *testing.T) {
 	c := New(cfg)
 
 	// Try to copy non-existent file
-	result := c.CopyFileWithRetry(filepath.Join(srcDir, "nonexistent.txt"))
+	result := c.CopyFileWithRetry(context.Background(), filepath.Join(srcDir, "nonexistent.txt"))
 
 	if result.Success {
 		t.Error("Expected Success=false for failed copy")
@@ -532,7 +533,7 @@ func TestCopyFileOverwriteExisting(t *testing.T) {
 
 	c := New(cfg)
 
-	err := c.CopyFile(srcFile, true)
+	err := c.CopyFile(context.Background(), srcFile, true)
 	if err != nil {
 		t.Errorf("CopyFile failed: %v", err)
 	}
@@ -681,7 +682,7 @@ func TestCopyFileToNonExistentDestDir(t *testing.T) {
 	c := New(cfg)
 
 	// Should create destination directory and copy
-	err := c.CopyFile(srcFile, true)
+	err := c.CopyFile(context.Background(), srcFile, true)
 	if err != nil {
 		t.Errorf("CopyFile failed: %v", err)
 	}
@@ -736,7 +737,7 @@ func TestCopyFileWithRetryMultipleAttempts(t *testing.T) {
 
 	c := New(cfg)
 
-	result := c.CopyFileWithRetry(srcFile)
+	result := c.CopyFileWithRetry(context.Background(), srcFile)
 
 	if !result.Success {
 		t.Error("Expected Success=true")
@@ -765,7 +766,7 @@ func TestCopierWithZeroRetries(t *testing.T) {
 
 	c := New(cfg)
 
-	result := c.CopyFileWithRetry(srcFile)
+	result := c.CopyFileWithRetry(context.Background(), srcFile)
 
 	if !result.Success {
 		t.Error("Expected Success=true even with 0 retries")
@@ -872,7 +873,7 @@ func TestCopyFileLargeContent(t *testing.T) {
 
 	c := New(cfg)
 
-	err := c.CopyFile(srcFile, true)
+	err := c.CopyFile(context.Background(), srcFile, true)
 	if err != nil {
 		t.Errorf("CopyFile failed: %v", err)
 	}
