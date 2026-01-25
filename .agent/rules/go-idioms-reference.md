@@ -262,6 +262,11 @@ go mod tidy
   - test
   - formatting
 
+- **Linting**: `.golangci.yml` MUST use version 2 schema (`version: "2"`).
+  - Use kebab-case for linter settings (e.g., `ignore-sigs`, `ignore-package-globs`).
+  - Exclusions must be configured under `linters: exclusions: rules` instead of `issues: exclude-rules`.
+  - Prefer global exclusions in config over redundant `//nolint` comments in test files.
+
 - Avoid build tags unless justified.
 
 ---

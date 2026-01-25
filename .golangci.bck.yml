@@ -1,0 +1,77 @@
+# golangci-lint configuration for copy-image project
+# This configuration is optimized for cross-platform builds
+# ================================================================
+
+run:
+  timeout: 5m
+
+
+linters:
+  enable:
+    - errcheck      # Check for unchecked errors
+    - gosimple      # Suggest code simplifications
+    - govet         # Report suspicious constructs
+    - ineffassign   # Detect unused assignments
+    - staticcheck   # Static analysis checks
+    - unused        # Check for unused code
+    - gofmt         # Check code formatting
+    - goimports     # Check imports are sorted
+    - misspell      # Check for misspelled words
+    - bodyclose     # Check HTTP response bodies are closed
+    - gocritic      # Highly extensible Go linter
+    - gosec         # Security checks
+  disable:
+    - exhaustive    # Too strict for our use case
+    - wrapcheck     # Too verbose for Wails bindings
+
+linters-settings:
+  errcheck:
+    # Ignore errors in defer statements and common patterns
+    exclude-functions:
+      - (io.Closer).Close
+      - (*os.File).Close
+      - (net/http.ResponseWriter).Write
+      - fmt.Sscanf  # Return value often intentionally ignored
+      - fmt.Fprintf
+      - fmt.Printf
+  
+  gocritic:
+    disabled-checks:
+      - ifElseChain  # Sometimes if-else is clearer than switch
+  
+  gosec:
+    excludes:
+      - G104  # Audit errors not checked (handled by errcheck)
+      - G304  # File path provided as taint input (required for file operations)
+      - G107  # Potential HTTP request made with variable url (required for API calls)
+  
+  goimports:
+    # Put project imports after standard library
+    local-prefixes: copy-image
+
+issues:
+  # Don't limit the number of issues
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  
+  # Exclude directories
+  exclude-dirs:
+    - frontend
+    - build
+  
+  # Skip Wails-specific files that require Windows
+  # These files have //go:build windows constraint
+  exclude-files:
+    - "main_wails.go"
+    - "app.go"
+    - "updater.go"
+    - "updater_test.go"
+  
+  # Exclude some issues in specific files
+  exclude-rules:
+    # Exclude some linters from running on test files
+    - path: _test\.go
+      linters:
+        - gosec
+        - errcheck
+
