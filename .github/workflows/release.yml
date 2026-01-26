@@ -76,7 +76,7 @@ jobs:
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o dist/copyimage-cli-darwin-arm64 ./cmd/copyimage
 
       - name: Upload CLI artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cli-binaries
           path: dist/
@@ -118,7 +118,7 @@ jobs:
           copy build\bin\copyimage.exe dist\copyimage-desktop-windows-amd64.exe
 
       - name: Upload Desktop artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: desktop-windows
           path: dist/copyimage-desktop-windows-amd64.exe

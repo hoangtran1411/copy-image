@@ -78,7 +78,7 @@ jobs:
           fi
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-report
           path: coverage.out
@@ -155,7 +155,7 @@ jobs:
           go build -ldflags="-s -w" -o copyimage-cli-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }} ./cmd/copyimage
 
       - name: Upload CLI binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: copyimage-cli-${{ matrix.goos }}-${{ matrix.goarch }}
           path: copyimage-cli-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
@@ -188,7 +188,7 @@ jobs:
         run: wails build -clean -ldflags "-s -w -X main.CurrentVersion=${{ github.ref_name }}"
 
       - name: Upload Wails binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: copyimage-desktop-windows-amd64
           path: build/bin/copyimage.exe
