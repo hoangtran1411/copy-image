@@ -8,6 +8,8 @@ linters:
     - gocritic
     - gosec
     - misspell
+    - staticcheck
+    - govet
   disable:
     - exhaustive
     - wrapcheck
@@ -20,6 +22,7 @@ linters:
         - fmt.Sscanf
         - fmt.Fprintf
         - fmt.Printf
+        - os.Remove
     gocritic:
       disabled-checks:
         - ifElseChain
@@ -43,6 +46,10 @@ linters:
     paths:
       - frontend
       - build
+      - .agent
+      - .github
+      - assets
+      - vendor
       - third_party$
       - builtin$
       - examples$
@@ -62,6 +69,10 @@ formatters:
     paths:
       - frontend
       - build
+      - .agent
+      - .github
+      - assets
+      - vendor
       - third_party$
       - builtin$
       - examples$
