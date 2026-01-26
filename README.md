@@ -25,11 +25,11 @@ Copy Image Tool is designed for high-performance file orchestration. Whether you
 
 ### ✨ Key Highlights
 
-*   � **Performance First**: Built with Go's legendary concurrency for blazing-fast parallel copying.
-*   � **Premium Desktop Experience**: A state-of-the-art GUI built with Wails, featuring glassmorphism and real-time status updates.
-*   � **Smart Copy Groups**: Unique feature to map one source to multiple destinations with individual settings.
-*   � **Network Native**: First-class support for UNC paths and complex network share environments.
-*   � **Bulletproof Updates**: Integrated auto-update system keeps you on the latest version effortlessly.
+*   ⚡ **Performance First**: Built with Go's legendary concurrency for blazing-fast parallel copying.
+*   🖥️ **Premium Desktop Experience**: A state-of-the-art GUI built with Wails, featuring glassmorphism and real-time status updates.
+*   📂 **Smart Copy Groups (Beta)**: Unique feature to map one source to multiple destinations with individual settings.
+*   🌐 **Network Native**: First-class support for UNC paths and complex network share environments.
+*   🔄 **Bulletproof Updates**: Integrated auto-update system keeps you on the latest version effortlessly.
 
 ---
 
@@ -73,7 +73,7 @@ Copy Image Tool is designed for high-performance file orchestration. Whether you
 ## � Installation & Setup
 
 ### Requirements
-- **Go**: v1.21 or higher
+- **Go**: v1.23 or higher
 - **Desktop App**: Windows 10/11 (WebView2 required)
 
 ### Fast Install
@@ -103,12 +103,23 @@ wails build -clean
 Simply run `copyimage-desktop-windows-amd64.exe` to launch the GUI.
 
 ### Using the CLI
-```bash
+
+#### Windows
+```powershell
 # Interactive mode (Recommended)
 ./copyimage-cli.exe
 
 # Command line mode (Automation)
 ./copyimage-cli.exe --source "C:\Photos" --dest "D:\Backup" --overwrite --workers 12
+```
+
+#### Linux / macOS
+```bash
+# Interactive mode
+./copyimage-cli
+
+# Command line mode
+./copyimage-cli --source "/media/data/images" --dest "/media/backup/images" --overwrite --workers 12
 ```
 
 ---
@@ -122,7 +133,7 @@ extensions: [.jpg, .png, .gif]
 max_retries: 3
 dry_run: false
 
-# Copy Groups
+# Copy Groups (BETA)
 groups:
   - id: "catalog-sync"
     name: "Sync Product Catalog"
